@@ -198,7 +198,7 @@ export default function Navbar({ serverSession }) {
             {username ? (
               <li><button onClick={() => { setIsMenuOpen(false); handleLogout(); }} className="text-red-600">Logout</button></li>
             ) : (
-              <li><Link href="/login" onClick={() => setIsMenuOpen(false)}>Sign in</Link></li>
+              <li><Link href="/login" onClick={() => setIsMenuOpen(false)} >Sign in</Link></li>
             )}
           </ul>
         </nav>
