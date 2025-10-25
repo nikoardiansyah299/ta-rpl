@@ -67,7 +67,7 @@ export default function HomePage() {
             <h2 className="text-2xl md:text-4xl font-semibold text-center">From the Depth of Indonesia’s Ocean, to the Tables of the World</h2>
             <div className="flex flex-wrap-reverse w-9/12 justify-center mx-auto my-15 bg-white border-1 border-stone-400 shadow-md rounded-2xl">
                 <div className="w-2/3 text-[#20639B] p-3 md:p-10 justify-center flex flex-col gap-11">
-                    <p className="text-xl"><strong>Deepsea</strong> is committed to bringing Indonesia's marine potential to the global market in a modern, efficient, and sustainable manner.
+                    <p className="text-sm md:text-xl"><strong>Deepsea</strong> is committed to bringing Indonesia's marine potential to the global market in a modern, efficient, and sustainable manner.
                     Together, we will create a more transparent and impactful future for exports that benefits coastal communities.</p>
                     <Link href="/product" className="w-full md:w-1/5 p-3 border-1 rounded-lg bg-[#20639B] font-semibold text-white shadow-md">Order Now</Link>
                 </div>

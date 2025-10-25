@@ -8,7 +8,7 @@ import { IoCartOutline } from "react-icons/io5";
 import { CgProfile } from "react-icons/cg";
 
 
-export default function Navbar({ serverSession }) {
+export default function Navbar({ serverSession, textColor = 'text-white' }) {
 
   const { data: clientSession, status } = useSession();
   const session = clientSession ?? serverSession;
@@ -98,7 +98,7 @@ export default function Navbar({ serverSession }) {
       <nav className={`fixed flex items-center justify-between px-5 md:px-15 py-4 w-screen z-50 transition-all duration-500 ${
         scrolled
           ? "bg-white text-black" :
-          "bg-transparent text-white"}`}>
+          `bg-transparent ${textColor}`}`}>
         <div className="w-full flex items-center justify-between gap-8">
           <Link href="/" className="font-semibold text-xl">DeepSea</Link>
           <div className="nav-link hidden md:block">
@@ -124,7 +124,7 @@ export default function Navbar({ serverSession }) {
           <span className="text-sm text-white animate-pulse">Loading...</span>
         </div>
         <div ref={overlayRef} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none md:hidden"></div>
-        <aside ref={sidebarRef} className={`fixed top-0 left-0 h-1/3 w-screen md:hidden ${scrolled ? "bg-white text-black" : "bg-white text-black"} shadow-xl`} role="dialog" aria-modal="true">
+        <aside ref={sidebarRef} className={`fixed top-0 left-0 h-1/3 w-screen rounded-md md:hidden ${scrolled ? "bg-white text-black" : "bg-white text-black"} shadow-xl`} role="dialog" aria-modal="true">
           <div className="flex items-center justify-between px-5 py-4 border-b">
             <span className="font-semibold">Menu</span>
             <button aria-label="Close Menu" onClick={() => setIsMenuOpen(false)} className="inline-flex w-8 h-8 items-center justify-center">
@@ -149,9 +149,9 @@ export default function Navbar({ serverSession }) {
     <nav className={`fixed flex items-center justify-between px-5 md:px-15 py-4 w-screen z-50 transition-all duration-500 ${
       scrolled 
       ? "bg-white text-black"
-      : "bg-transparent text-white"}`}>
+      : `bg-transparent ${textColor}`}`}>
       <div className="w-full flex items-center justify-between gap-8">
-        <Link href="/" className="font-semibold text-xl">DeepSea</Link>
+        <Link href="/" className="font-bold text-xl">DeepSea</Link>
         <div className="nav-link hidden md:block">
           <ul className="flex items-center gap-8 mr-5 font-semibold">
             <li><Link href={"/about"}>About Deepsea</Link></li>
@@ -187,7 +187,7 @@ export default function Navbar({ serverSession }) {
       
       <div ref={overlayRef} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none md:hidden"></div>
       
-      <aside ref={sidebarRef} className={`fixed top-1 left-0 w-11/12 md:hidden p-2 ${scrolled ? "bg-white text-black" : "bg-white text-black"} shadow-xl`} role="dialog" aria-modal="true">
+      <aside ref={sidebarRef} className={`fixed top-0 left-0 w-full  rounded-md md:hidden p-2 ${scrolled ? "bg-white text-black" : "bg-white text-black"} shadow-xl`} role="dialog" aria-modal="true">
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <span className="font-semibold">Menu</span>
           <button aria-label="Close Menu" onClick={() => setIsMenuOpen(false)} className="inline-flex w-8 h-8 items-center justify-center">
