@@ -1,21 +1,29 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
-import prisma from "@/lib/prisma";
+import { getUserIdFromRequest } from "@/lib/authHelper";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req) {
   try {
-    const token = req.cookies.get("access_token")?.value;
-    if (!token) return NextResponse.json({ user: null });
+    // Dapatkan user ID dari kedua sistem authentication
+    const { userId, authType } = await getUserIdFromRequest(req);
+    
+    if (!userId) {
+      return NextResponse.json({ user: null });
+    }
 
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const user = await prisma.users.findUnique({
-      where: { id_user: decoded.id_user },
-      select: { id_user: true, username: true, email: true },
+      where: { id_user: userId },
+      select: { 
+        id_user: true, 
+        username: true, 
+        email: true,
+        alamat: true,
+      },
     });
 
     return NextResponse.json({ user });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching user:", err);
     return NextResponse.json({ user: null });
   }
 }

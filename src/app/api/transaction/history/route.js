@@ -1,27 +1,44 @@
 // /app/api/transaction/history/route.js
 import { prisma } from "@/lib/prisma";
-import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
+import { getUserIdFromRequest } from "@/lib/authHelper";
 
 export async function GET(req) {
   try {
-    const token = cookies().get("access_token")?.value;
-    if (!token) {
-      return Response.json({ message: "Unauthorized" }, { status: 401 });
+    // Dapatkan user ID dari kedua sistem authentication
+    const { userId, authType } = await getUserIdFromRequest(req);
+    
+    if (!userId) {
+      return Response.json({ 
+        message: "Unauthorized - Silakan login terlebih dahulu",
+        error: "Unauthorized" 
+      }, { status: 401 });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(`Transaction History: User authenticated via ${authType}, userId: ${userId}`);
 
+    // Ambil data transaksi
     const transaksi = await prisma.transaksi.findMany({
-      where: { id_user: decoded.id_user },
+      where: { id_user: userId },
       include: {
         jasa_pengirim: true,
       },
       orderBy: { tgl_transaksi: "desc" },
     });
 
-    return Response.json({ transaksi });
+    // Ambil semua produk
+    const produk = await prisma.produk.findMany({
+      orderBy: { id_produk: "desc" },
+    });
+
+    return Response.json({ 
+      transaksi,
+      produk 
+    });
   } catch (error) {
-    return Response.json({ message: error.message }, { status: 500 });
+    console.error("Transaction history error:", error);
+    return Response.json({ 
+      message: error.message || "Gagal memuat riwayat transaksi",
+      error: error.message 
+    }, { status: 500 });
   }
 }

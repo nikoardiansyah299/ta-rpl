@@ -36,29 +36,31 @@ export async function POST(req) {
     const totalBarang = cartItems.reduce((sum, item) => sum + item.total_harga, 0);
     const totalBayar = totalBarang + pengiriman.harga_pengiriman;
 
-    // Buat record transaksi baru
+    // Map metode pembayaran ke enum values
+    const metodeMap = {
+      transfer_bank: "Bank",
+      e_wallet: "Dana",
+      cod: "Bank", // COD bisa pakai Bank
+    };
+    const metodeEnum = metodeMap[metode] || "Bank";
+
+    // Simpan snapshot keranjang sebelum checkout (untuk history)
+    // Buat transaksi dan simpan detail produk dari keranjang
     const transaksi = await prisma.transaksi.create({
       data: {
         id_user: userId,
         id_pengiriman: pengiriman.id_pengiriman,
-        metode_transaksi: {
-          create: {
-            nama_metode: metode || "Transfer Bank",
-            total_bayar: totalBayar,
-            status: "berhasil",
-          },
-        },
+        metode_transaksi: metodeEnum,
+        status_transaksi: "pending",
       },
       include: {
         jasa_pengirim: true,
-        metode_transaksi: true,
       },
     });
 
-    // Update semua item keranjang user (anggap checkout)
-    await prisma.keranjang.updateMany({
+    // Hapus semua item keranjang user setelah checkout
+    await prisma.keranjang.deleteMany({
       where: { id_user: userId },
-      data: { status: "checkout" },
     });
 
     return new Response(
@@ -70,7 +72,13 @@ export async function POST(req) {
     );
   } catch (err) {
     console.error("Payment error:", err);
-    return new Response(JSON.stringify({ error: "Gagal memproses transaksi" }), { status: 500 });
+    return new Response(
+      JSON.stringify({ 
+        error: "Gagal memproses transaksi",
+        details: err.message 
+      }), 
+      { status: 500 }
+    );
   }
 }
 

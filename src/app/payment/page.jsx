@@ -13,6 +13,8 @@ export default function PaymentPage() {
   const [metode, setMetode] = useState("");
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [userAlamat, setUserAlamat] = useState("");
+  const [loadingAlamat, setLoadingAlamat] = useState(true);
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -31,6 +33,7 @@ export default function PaymentPage() {
 
     fetchCart();
     fetchJasa();
+    fetchUserAlamat();
   }, [status, session, router]);
 
   const fetchCart = async () => {
@@ -50,6 +53,21 @@ export default function PaymentPage() {
     setJasaList(data);
   };
 
+  const fetchUserAlamat = async () => {
+    setLoadingAlamat(true);
+    try {
+      const res = await fetch("/api/me");
+      const data = await res.json();
+      if (res.ok && data.user) {
+        setUserAlamat(data.user.alamat || "");
+      }
+    } catch (err) {
+      console.error("Error fetching user address:", err);
+    } finally {
+      setLoadingAlamat(false);
+    }
+  };
+
   const handlePayment = async () => {
     if (!metode) return alert("Pilih metode pembayaran!");
     if (!selectedJasa) return alert("Pilih jasa pengiriman!");
@@ -63,11 +81,14 @@ export default function PaymentPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Pembayaran gagal");
+      if (!res.ok) {
+        throw new Error(data.error || data.details || "Pembayaran gagal");
+      }
       alert("Transaksi berhasil!");
       router.push("/history");
     } catch (err) {
-      alert(err.message);
+      console.error("Payment error:", err);
+      alert(err.message || "Terjadi kesalahan saat memproses pembayaran");
     } finally {
       setLoading(false);
     }
@@ -82,6 +103,29 @@ export default function PaymentPage() {
       <div className="min-h-screen py-10 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6">
           <h1 className="text-3xl font-bold mb-6 text-blue-900">Checkout Pembayaran</h1>
+
+          {/* Alamat Pengiriman */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Alamat Pengiriman</h2>
+            {loadingAlamat ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <p className="text-gray-500 text-sm">Memuat alamat...</p>
+              </div>
+            ) : userAlamat ? (
+              <p className="text-gray-800">{userAlamat}</p>
+            ) : (
+              <div>
+                <p className="text-gray-500 italic mb-2">Belum ada alamat terdaftar</p>
+                <button
+                  onClick={() => router.push("/Profile")}
+                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                >
+                  Tambah Alamat di Profil
+                </button>
+              </div>
+            )}
+          </div>
 
           <div className="space-y-4">
             {cartItems.map((item) => (
@@ -121,7 +165,7 @@ export default function PaymentPage() {
             >
               <option value="">-- Pilih Metode --</option>
               <option value="transfer_bank">Transfer Bank</option>
-              <option value="e_wallet">E-Wallet</option>
+              <option value="e_wallet">E-Wallet (Dana)</option>
               <option value="cod">COD</option>
             </select>
           </div>

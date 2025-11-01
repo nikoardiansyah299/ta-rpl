@@ -2,9 +2,73 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
 export async function GET(req) {
   try {
-    // Ambil cookie dari request
+    // Cek NextAuth session terlebih dahulu (untuk Google Auth users)
+    const session = await getServerSession(authOptions);
+    
+    if (session?.user?.id_user) {
+      // User login via NextAuth (Google Auth)
+      // Generate token baru dari session
+      const user = await prisma.users.findUnique({
+        where: { id_user: session.user.id_user },
+      });
+
+      if (!user) {
+        return NextResponse.json({ message: "User tidak ditemukan" }, { status: 404 });
+      }
+
+      // Generate access token dan refresh token baru
+      const newAccessToken = jwt.sign(
+        { id_user: user.id_user, email: user.email },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+      );
+      const newRefreshToken = jwt.sign(
+        { id_user: user.id_user, email: user.email },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      // Update DB dengan refresh token baru
+      await prisma.users.update({
+        where: { id_user: user.id_user },
+        data: { token: newRefreshToken },
+      });
+
+      // Set cookies
+      const response = NextResponse.json({
+        message: "Access token diperbarui",
+        user: {
+          id_user: user.id_user,
+          username: user.username,
+          email: user.email,
+        },
+      });
+
+      response.cookies.set("access_token", newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 15 * 60, // 15 menit
+        path: "/",
+      });
+
+      response.cookies.set("refresh_token", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60, // 7 hari
+        path: "/",
+      });
+
+      return response;
+    }
+
+    // Jika tidak ada NextAuth session, cek JWT refresh token (untuk login biasa)
     const refreshToken = req.cookies.get("refresh_token")?.value;
 
     if (!refreshToken) {
@@ -60,7 +124,7 @@ export async function GET(req) {
 
     response.cookies.set("access_token", newAccessToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 15 * 60, // 15 menit
       path: "/",
@@ -68,7 +132,7 @@ export async function GET(req) {
 
     response.cookies.set("refresh_token", newRefreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60, // 7 hari
       path: "/",

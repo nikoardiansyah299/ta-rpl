@@ -163,46 +163,105 @@ export default function ProductDetail({ params }) {
                 <div className="max-w-4xl w-full bg-white rounded-2xl shadow-lg overflow-hidden">
                     <div className="flex flex-col md:flex-row">
                         <div className="relative w-full md:w-1/2 h-[400px]">
-                            <Image
-                            src={product.image_url || "/product-media/default.jpg"}
-                            alt={product.nama_produk}
-                            fill
-                            className="object-cover"
-                            />
+                            {product.image_url ? (
+                                <Image
+                                    src={product.image_url.startsWith('/') || product.image_url.startsWith('http') 
+                                        ? product.image_url 
+                                        : `/${product.image_url}`}
+                                    alt={product.nama_produk}
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <span className="text-gray-400">No Image</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="p-6 md:w-1/2 flex flex-col justify-between">
-                            <div>
-                                <h1 className="text-3xl font-bold mb-4">{product.nama_produk}</h1>
-                                <p className="text-gray-600 mb-6">{product.deskripsi || "Tidak ada deskripsi."}</p>
-                                <p className="text-2xl font-semibold text-blue-600">
-                                    Rp {product.harga_kg.toLocaleString()} / kg
-                                </p>
-                                <p className="text-lg font-medium text-green-600">
-                                    Total: Rp {(product.harga_kg * quantity).toLocaleString()}
-                                </p>
-                            </div>
-                            <div className="flex gap-3 items-center">
-                                <p className="text-gray-600">Quantity:</p>
-                                <button 
-                                    onClick={decreaseQuantity}
-                                    disabled={quantity <= 1}
-                                    className="px-3 text-2xl bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
-                                >
-                                    -
-                                </button>
-                                <p className="px-4 py-2 bg-gray-100 rounded min-w-12 text-center">{quantity}</p>
-                                <button 
-                                    onClick={increaseQuantity}
-                                    className="px-3 text-2xl bg-gray-200 hover:bg-gray-300 rounded"
-                                >
-                                    +
-                                </button>
-                            </div>
-                            <div className="flex gap-5 items-end w-full">
-                                <button onClick={handleAddToCart} disabled={loading} className="mt-6 bg-gray-200 text-blue-800 py-2 px-8 rounded-sm border border-blue-800 transition disabled:opacity-50">{loading ? "Adding..." : "Add To Cart"}</button>
-                                <button onClick={handleOrderNow} disabled={loading} className="mt-6 bg-blue-800 text-white py-2 px-8 rounded-sm hover:bg-blue-900 transition disabled:opacity-50">{loading ? "Processing..." : "Order Now"}</button>
-                            </div>
+                        <div>
+                            <h1 className="text-3xl font-bold mb-4">{product.nama_produk}</h1>
+                            <p className="text-gray-600 mb-6">{product.deskripsi || "Tidak ada deskripsi."}</p>
+                            <p className="text-2xl font-semibold text-blue-600">
+                            Rp {product.harga_kg.toLocaleString()} / kg
+                            </p>
+                            <p className="text-lg font-medium text-green-600">
+                            Total: Rp {(product.harga_kg * (quantity || 0)).toLocaleString()}
+                            </p>
+                        </div>
+
+                        {/* Input jumlah pembelian */}
+                        <div className="flex gap-3 items-center">
+                            <p className="text-gray-600">Quantity:</p>
+
+                            <button
+                            onClick={decreaseQuantity}
+                            disabled={quantity <= 1}
+                            className="px-3 text-2xl bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
+                            >
+                            -
+                            </button>
+
+                            {/*  Input tanpa spinner + bisa dikosongkan */}
+                            <input
+                            type="number"
+                            min="1"
+                            max="1000"
+                            value={quantity === null ? "" : quantity}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                // Kalau input dikosongkan
+                                if (val === "") {
+                                setQuantity(null);
+                                return;
+                                }
+                                // Ubah ke angka & validasi batas
+                                const num = parseInt(val);
+                                if (!isNaN(num)) {
+                                if (num > 1000) setQuantity(1000);
+                                else if (num < 1) setQuantity(1);
+                                else setQuantity(num);
+                                }
+                            }}
+                            onBlur={() => {
+                                // Saat input keluar fokus dan kosong, set ke 1
+                                if (quantity === null || quantity === "") setQuantity(1);
+                            }}
+                            className="w-24 text-center border border-gray-300 rounded py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                        [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
+                                        [-moz-appearance:textfield]"
+                            placeholder="0"
+                            />
+
+                            <button
+                            onClick={() => {
+                                if (quantity < 1000) setQuantity(quantity + 1);
+                            }}
+                            disabled={quantity >= 1000}
+                            className="px-3 text-2xl bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
+                            >
+                            +
+                            </button>
+                        </div>
+
+                        <div className="flex gap-5 items-end w-full">
+                            <button
+                            onClick={handleAddToCart}
+                            disabled={loading || !quantity}
+                            className="mt-6 bg-gray-200 text-blue-800 py-2 px-8 rounded-sm border border-blue-800 transition disabled:opacity-50"
+                            >
+                            {loading ? "Adding..." : "Add To Cart"}
+                            </button>
+                            <button
+                            onClick={handleOrderNow}
+                            disabled={loading || !quantity}
+                            className="mt-6 bg-blue-800 text-white py-2 px-8 rounded-sm hover:bg-blue-900 transition disabled:opacity-50"
+                            >
+                            {loading ? "Processing..." : "Order Now"}
+                            </button>
+                        </div>
                         </div>
                     </div>
                 </div>

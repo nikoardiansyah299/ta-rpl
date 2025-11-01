@@ -126,7 +126,12 @@ const Loginpage = () => {
                             <button type="submit" disabled={loading} className="bg-[#4292c6] p-2 rounded-md text-white shadow-md shadow-gray-400 ">{loading? "Memproses.." : "Sign In"}</button>
                         </div>
                     </form>
-                    <button onClick={() => signIn("google", {callbackUrl: "/" })} className="w-full cursor-pointer flex justify-center items-center gap-2 bg-[#ffffff] p-2 rounded-md text-black shadow-md border-1 border-stone-500"><FcGoogle />Sign In with Google</button>
+                    <button 
+                      onClick={() => signIn("google", { callbackUrl: "/" })} 
+                      className="w-full cursor-pointer flex justify-center items-center gap-2 bg-[#ffffff] p-2 rounded-md text-black shadow-md border-1 border-stone-500"
+                    >
+                      <FcGoogle />Sign In with Google
+                    </button>
                     <div className="">
                         <span>Don't have an account? </span>
                         <a href="/register" className="text-[#4292c6] underline">Register</a>
