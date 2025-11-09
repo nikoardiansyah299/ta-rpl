@@ -13,7 +13,7 @@ const Footer = () => {
         <div className="w-full px-15 py-5 pb-10 border-t border-gray-300 bg-white">
             <footer className="flex flex-col gap-15">
                 <div className="flex gap-10 items-center">
-                    <p className="text-2xl font-bold text-[#131369]">Deepsea</p>
+                    <p className="text-2xl font-bold text-blue-600">Deepsea</p>
                     <p className="text-xl font-semibold text-[#16162d]">The Best Product For You</p>
                 </div>
                 <div className="flex flex-wrap justify-between w-11/12">

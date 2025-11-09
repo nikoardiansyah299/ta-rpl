@@ -21,22 +21,12 @@ model keranjang {
   id_produk        Int
   jumlah_pembelian Int
   total_harga      Int
+
   users            users  @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "keranjang_ibfk_1")
   produk           produk @relation(fields: [id_produk], references: [id_produk], onDelete: NoAction, onUpdate: NoAction, map: "keranjang_ibfk_2")
 
   @@index([id_produk], map: "id_produk")
   @@index([id_user], map: "id_user")
-}
-
-model produk {
-  id_produk   Int         @id @default(autoincrement())
-  nama_produk String      @db.VarChar(100)
-  stok_kg     Int?        @default(0)
-  harga_kg    Int
-  deskripsi   String?     @db.Text
-  status      String?     @db.VarChar(50)    
-  gambar      String?     @db.VarChar(255)   
-  keranjang   keranjang[]
 }
 
 model transaksi {
@@ -46,12 +36,40 @@ model transaksi {
   metode_transaksi transaksi_metode_transaksi?
   tgl_transaksi    DateTime?                   @default(now()) @db.Timestamp(0)
   status_transaksi String?                     @default("pending") @db.VarChar(50)
-
+  
   users            users                       @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_1")
   jasa_pengirim    jasa_pengirim               @relation(fields: [id_pengiriman], references: [id_pengiriman], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_2")
+  detail_transaksi detail_transaksi[]
 
   @@index([id_pengiriman], map: "id_pengiriman")
   @@index([id_user], map: "id_user")
+}
+
+model produk {
+  id_produk   Int         @id @default(autoincrement())
+  nama_produk String      @db.VarChar(100)
+  stok_kg     Int?        @default(0)
+  harga_kg    Int
+  deskripsi   String?     @db.Text
+  status      String?     @db.VarChar(50)
+  gambar      String?     @db.VarChar(255)
+  keranjang   keranjang[]
+  detail_transaksi detail_transaksi[]
+
+}
+
+model detail_transaksi {
+  id_detail       Int       @id @default(autoincrement())
+  id_transaksi    Int
+  id_produk       Int
+  jumlah_kg       Int
+  subtotal        Int
+
+  transaksi       transaksi @relation(fields: [id_transaksi], references: [id_transaksi])
+  produk          produk    @relation(fields: [id_produk], references: [id_produk])
+
+  @@index([id_transaksi])
+  @@index([id_produk])
 }
 
 

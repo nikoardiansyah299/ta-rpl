@@ -6,20 +6,25 @@ import ProductCard from "@/components/ProductCard";
 
 export default function ProductPage() {
   const [produk, setProduk] = useState([]);
+  const [filteredProduk, setFilteredProduk] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const categories = [
-    { key: "all", label: "Semua" },
-    { key: "ikan", label: "Ikan" },
-    { key: "kerang", label: "Kerang" },
-    { key: "kepiting", label: "Kepiting" },
-  ];
-  const categoryImages = {
-    ikan: "/category-media/fish.jpg",
-    kerang: "/category-media/shrimps.webp",
-    kepiting: "/category-media/crabs.png",
-  };
+  // Effect untuk filter produk berdasarkan pencarian
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredProduk(produk);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = produk.filter((prod) =>
+      prod.nama_produk.toLowerCase().includes(query) ||
+      prod.kategori?.nama_kategori.toLowerCase().includes(query)
+    );
+    setFilteredProduk(filtered);
+  }, [searchQuery, produk]);
 
   useEffect(() => {
     async function fetchProduk() {
@@ -46,35 +51,24 @@ export default function ProductPage() {
   return (
     <div>
       <Navbar textColor='text-black'/>
-      <div className='flex flex-col justify-end gap-30 h-screen bg-gradient-to-t from-white to-black/20'>
+      <div className='flex flex-col justify-center gap-30 h-96 bg-gradient-to-t from-white to-black/20'>
         <div className='justify-center items-start flex flex-col gap-6'>
           <h1 className='text-5xl font-semibold ml-20'>Indonesian Marine Fish Products</h1>
-          <input type="text" placeholder="Search products..." className="w-1/2 p-2 border border-gray-300 ml-20 rounded-md mb-4" />
-        </div>
-
-        <div className="flex justify-center gap-8 pb-2">
-          {categories.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => setSelectedCategory(cat.key)}
-              className={`pb-2 text-xl font-medium transition-all relative
-                ${selectedCategory === cat.key ? "text-blue-600" : "text-gray-500 hover:text-gray-700"}
-                `}
-            >
-              {cat.label}
-              {selectedCategory === cat.key && (
-                <span className="absolute left-0 bottom-0 w-full h-[3px] bg-blue-600 rounded-t-md"></span>
-              )}
-            </button>
-          ))}
+          <input 
+            type="text" 
+            placeholder="Search products..." 
+            className="w-1/2 p-2 border border-gray-300 ml-20 rounded-md mb-4"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-8 px-10 py-10">
         {loading ? (
           <p className="col-span-3 text-center text-gray-500">Loading products...</p>
-        ) : produk.length > 0 ? (
-          produk.map((prod) => <ProductCard key={prod.id_produk} product={prod} />)
+        ) : filteredProduk.length > 0 ? (
+          filteredProduk.map((prod) => <ProductCard key={prod.id_produk} product={prod} />)
         ) : (
           <p className="col-span-3 text-center text-gray-500">
             Tidak ada produk di kategori ini.

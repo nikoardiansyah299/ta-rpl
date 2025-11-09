@@ -154,8 +154,8 @@ export default function Navbar({ serverSession, textColor = 'text-white' }) {
         <Link href="/" className="font-bold text-xl">DeepSea</Link>
         <div className="nav-link hidden md:block">
           <ul className="flex items-center gap-8 mr-5 font-semibold">
-            <li><Link href={"/about"}>About Deepsea</Link></li>
             <li><Link href={"/product"}>Product</Link></li>
+            <li><Link href={"/about"}>About Deepsea</Link></li>
             <li><Link href={"/sustainability"}>Sustainability</Link></li>
             <li><Link href={"/contact"}>Contact</Link></li>
             <li className="text-xl"><Link href="/cart"><IoCartOutline /></Link></li>
@@ -196,8 +196,8 @@ export default function Navbar({ serverSession, textColor = 'text-white' }) {
         </div>
         <nav className="px-5 py-4">
           <ul className="flex flex-col gap-4 font-semibold">
-            <li><Link href="/about" onClick={() => setIsMenuOpen(false)}>About Deepsea</Link></li>
             <li><Link href="/product" onClick={() => setIsMenuOpen(false)}>Product</Link></li>
+            <li><Link href="/about" onClick={() => setIsMenuOpen(false)}>About Deepsea</Link></li>
             <li><Link href="/sustainability" onClick={() => setIsMenuOpen(false)}>Sustainability</Link></li>
             <li><Link href="/contact" onClick={() => setIsMenuOpen(false)}>Contact Me</Link></li>
             <li><Link href="/cart" onClick={() => setIsMenuOpen(false)} className="flex gap-2 items-center"><IoCartOutline />Cart</Link></li>

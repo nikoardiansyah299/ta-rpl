@@ -21,18 +21,17 @@ export async function GET(req) {
       where: { id_user: userId },
       include: {
         jasa_pengirim: true,
+        detail_transaksi: {
+          include: {
+            produk: true,
+          },
+        },
       },
       orderBy: { tgl_transaksi: "desc" },
     });
 
-    // Ambil semua produk
-    const produk = await prisma.produk.findMany({
-      orderBy: { id_produk: "desc" },
-    });
-
     return Response.json({ 
-      transaksi,
-      produk 
+      transaksi
     });
   } catch (error) {
     console.error("Transaction history error:", error);
