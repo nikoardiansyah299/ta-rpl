@@ -179,7 +179,7 @@ export default function Navbar({ serverSession, textColor = 'text-white' }) {
         </div>
       ) : (
         <div className="hidden md:flex items-center">
-          <button className="px-3 py-1 bg-transparent text-white font-semibold cursor-pointer">
+          <button className="px-3 py-1 bg-transparent font-semibold cursor-pointer">
             <Link href="/login">Login</Link>
           </button>
         </div>

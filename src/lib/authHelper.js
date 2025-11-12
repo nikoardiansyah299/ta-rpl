@@ -9,28 +9,42 @@ import jwt from "jsonwebtoken";
  */
 export async function getUserIdFromRequest(req) {
   try {
-    // Coba NextAuth session terlebih dahulu
+    // Coba NextAuth session terlebih dahulu (pass req and res context)
     const session = await getServerSession(authOptions);
     if (session?.user?.id_user) {
+      console.log(`[AuthHelper] NextAuth session found: id_user=${session.user.id_user}`);
       return {
         userId: session.user.id_user,
         authType: 'nextauth'
       };
     }
 
-    // Jika NextAuth tidak ada, coba JWT
-    const token = req.cookies.get("access_token")?.value;
+    // Jika NextAuth tidak ada, coba JWT dari cookie
+    let token = null;
+    
+    // Handle cookie dari request object
+    if (req && typeof req.cookies.get === 'function') {
+      token = req.cookies.get("access_token")?.value;
+    }
+    
     if (token) {
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-      return {
-        userId: decoded.id_user,
-        authType: 'jwt'
-      };
+      try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        console.log(`[AuthHelper] JWT token verified: id_user=${decoded.id_user}`);
+        return {
+          userId: decoded.id_user,
+          authType: 'jwt'
+        };
+      } catch (jwtErr) {
+        console.error(`[AuthHelper] JWT verification failed:`, jwtErr.message);
+        return { userId: null, authType: null };
+      }
     }
 
+    console.log(`[AuthHelper] No session or token found`);
     return { userId: null, authType: null };
   } catch (err) {
-    console.error("Error getting user ID:", err);
+    console.error("[AuthHelper] Error getting user ID:", err);
     return { userId: null, authType: null };
   }
 }

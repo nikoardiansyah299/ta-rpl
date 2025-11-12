@@ -21,21 +21,20 @@ export default function HistoryPage() {
     if (status === 'loading') return;
 
     const fetchTransactions = async () => {
-      const isNextAuthLoggedIn = status === 'authenticated' && session?.user?.id_user;
-      const jwtToken = Cookies.get("access_token");
-      
-      if (!isNextAuthLoggedIn && !jwtToken) {
-        alert("Silakan login terlebih dahulu!");
-        router.push("/login");
-        return;
-      }
-
+      // Do not rely on client-readable JWT; attempt to fetch and let server
+      // validate httpOnly cookie (if present). Let server decide auth.
       try {
         const res = await fetch("/api/transaction/history", {
           cache: "no-store",
+          credentials: 'include',
         });
 
         const data = await res.json();
+        if (res.status === 401 || res.status === 403) {
+          alert("Silakan login terlebih dahulu!");
+          router.push("/login");
+          return;
+        }
         if (!res.ok) throw new Error(data.message || data.error || "Gagal memuat data");
         
         setTransactions(data.transaksi || []);
@@ -140,8 +139,8 @@ export default function HistoryPage() {
               { value: "all", label: "Semua", count: transactions.length },
               { value: "pending", label: "Pending", count: transactions.filter(t => t.status_transaksi === "pending").length },
               { value: "shipping", label: "Shipping", count: transactions.filter(t => t.status_transaksi === "shipping").length },
-              { value: "arrived", label: "Sampai", count: transactions.filter(t => t.status_transaksi === "arrived").length },
-              { value: "cancelled", label: "Dibatalkan", count: transactions.filter(t => t.status_transaksi === "cancelled").length }
+              { value: "arrived", label: "Arrived", count: transactions.filter(t => t.status_transaksi === "arrived").length },
+              { value: "cancelled", label: "Cencelled", count: transactions.filter(t => t.status_transaksi === "cancelled").length }
             ].map((filter) => (
               <button
                 key={filter.value}

@@ -109,20 +109,17 @@ export default function ProductDetail({ params }) {
     };
 
     const handleAddToCart = async () => {
-        // Cek apakah user sudah login (NextAuth atau JWT)
+        // Cek apakah user sudah login (NextAuth). For manual-login using httpOnly cookie
+        // we don't rely on client-readable cookies; attempt the request and let
+        // the server validate the cookie.
         const isNextAuthLoggedIn = session?.user?.id_user;
-        const jwtToken = Cookies.get("access_token");
-        
-        if (!isNextAuthLoggedIn && !jwtToken) {
-            alert("Silakan login terlebih dahulu!");
-            router.push("/login");
-            return;
-        }
 
+        // proceed and let server validate via cookie
         setLoading(true);
         try {
             const res = await fetch("/api/cart/add", {
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -134,6 +131,11 @@ export default function ProductDetail({ params }) {
             });
 
             const data = await res.json();
+            if (res.status === 401 || res.status === 403) {
+                alert("Silakan login terlebih dahulu!");
+                router.push("/login");
+                return;
+            }
 
             if (!res.ok) throw new Error(data.error || "Gagal menambahkan ke keranjang");
             showNotification("Produk berhasil ditambahkan ke keranjang!", "success");
@@ -146,21 +148,18 @@ export default function ProductDetail({ params }) {
     };
 
     const handleOrderNow = async () => {
-        // Cek apakah user sudah login (NextAuth atau JWT)
+        // Cek apakah user sudah login (NextAuth). For manual-login using httpOnly cookie
+        // we don't rely on client-readable cookies; attempt the request and let
+        // the server validate the cookie.
         const isNextAuthLoggedIn = session?.user?.id_user;
-        const jwtToken = Cookies.get("access_token");
-        
-        if (!isNextAuthLoggedIn && !jwtToken) {
-            alert("Silakan login terlebih dahulu!");
-            router.push("/login");
-            return;
-        }
 
+        // proceed and let server validate via cookie
         setLoading(true);
         try {
             // Tambahkan produk ke keranjang dulu
             const res = await fetch("/api/cart/add", {
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -172,6 +171,11 @@ export default function ProductDetail({ params }) {
             });
 
             const data = await res.json();
+            if (res.status === 401 || res.status === 403) {
+                alert("Silakan login terlebih dahulu!");
+                router.push("/login");
+                return;
+            }
 
             if (!res.ok) throw new Error(data.error || "Gagal menambahkan ke keranjang");
             
