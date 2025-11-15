@@ -100,7 +100,7 @@ export default function Navbar({ serverSession, textColor = 'text-white' }) {
           ? "bg-white text-black" :
           `bg-transparent ${textColor}`}`}>
         <div className="w-full flex items-center justify-between gap-8">
-          <Link href="/" className="font-semibold text-xl">DeepSea</Link>
+          <Link href="/" className="font-bold text-xl">Deepsea</Link>
           <div className="nav-link hidden md:block">
             <ul className="flex items-center gap-8 mr-5 font-semibold">
               <li><Link href={"/product"}>Product</Link></li>
@@ -151,7 +151,7 @@ export default function Navbar({ serverSession, textColor = 'text-white' }) {
       ? "bg-white text-black"
       : `bg-transparent ${textColor}`}`}>
       <div className="w-full flex items-center justify-between gap-8">
-        <Link href="/" className="font-bold text-xl">DeepSea</Link>
+        <Link href="/" className="font-bold text-xl">Deepsea</Link>
         <div className="nav-link hidden md:block">
           <ul className="flex items-center gap-8 mr-5 font-semibold">
             <li><Link href={"/product"}>Product</Link></li>
@@ -179,7 +179,7 @@ export default function Navbar({ serverSession, textColor = 'text-white' }) {
         </div>
       ) : (
         <div className="hidden md:flex items-center">
-          <button className="px-3 py-1 bg-transparent text-white font-semibold cursor-pointer">
+          <button className="px-3 py-1 bg-transparent font-semibold cursor-pointer">
             <Link href="/login">Login</Link>
           </button>
         </div>

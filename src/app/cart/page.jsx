@@ -22,33 +22,47 @@ export default function CartPage() {
     return sum + (item?.total_harga || 0);
   }, 0);
 
-  // 🔐 Cek login via NextAuth (Google) atau JWT cookie
   useEffect(() => {
-    if (status === 'loading') return; // tunggu next-auth siap
+    if (status === "loading") return; // tunggu next-auth siap
 
-    // Jika login via NextAuth, langsung fetch
-    if (status === 'authenticated' && session?.user?.id_user) {
-      fetchCart();
-      return;
-    }
+    const checkAuth = async () => {
+      try {
+        // Jika login via NextAuth (Google)
+        if (status === "authenticated" && session?.user?.id_user) {
+          fetchCart();
+          return;
+        }
 
-    // Jika tidak authenticated NextAuth, cek JWT cookie
-    const token = Cookies.get("access_token");
-    if (token) {
-      fetchCart();
-      return;
-    }
+        // Kalau login manual (JWT)
+        const res = await fetch("/api/me", {
+          credentials: "include",
+        });
 
-    // Tidak ada keduanya → minta login
-    alert("Silakan login terlebih dahulu!");
-    router.push("/login");
+        const data = await res.json();
+
+        if (data?.user?.id_user) {
+          fetchCart();
+        } else {
+          alert("Silakan login terlebih dahulu!");
+          router.push("/login");
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+        alert("Silakan login terlebih dahulu!");
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
   }, [status, session, router]);
+
 
   // Ambil isi keranjang user
   const fetchCart = async () => {
     try {
       const res = await fetch("/api/cart", {
         cache: "no-store",
+        credentials: "include",
       });
 
       const data = await res.json();

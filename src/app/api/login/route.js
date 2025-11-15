@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
 
+
 export async function POST(req) {
   try {
     const { email, password } = await req.json();
@@ -30,12 +31,12 @@ export async function POST(req) {
     const accessToken = jwt.sign(
       { id_user: user.id_user, email: user.email },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "15m" }
     );
     const refreshToken = jwt.sign(
       { id_user: user.id_user, email: user.email },
       process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "7d" }
     );
 
     await prisma.users.update({
@@ -54,17 +55,17 @@ export async function POST(req) {
 
     response.cookies.set("access_token", accessToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 15 * 60, // 15 menit
+        maxAge: 15 * 60, 
         path: "/",
     });
   
     response.cookies.set("refresh_token", refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60, // 7 hari
+        maxAge: 7 * 24 * 60 * 60,
         path: "/",
     });
 

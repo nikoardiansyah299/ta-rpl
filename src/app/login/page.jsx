@@ -123,7 +123,7 @@ const Loginpage = () => {
                         </div>
                         {message && <p className="text-red-500">{message}</p>}
                         <div className="flex flex-col gap-4 mt-4">
-                            <button type="submit" disabled={loading} className="bg-[#4292c6] p-2 rounded-md text-white shadow-md shadow-gray-400 ">{loading? "Memproses.." : "Sign In"}</button>
+                            <button type="submit" disabled={loading} className="bg-[#4292c6] p-2 rounded-md text-white shadow-md shadow-gray-400 ">{loading? "Processing.." : "Sign In"}</button>
                         </div>
                     </form>
                     <button 

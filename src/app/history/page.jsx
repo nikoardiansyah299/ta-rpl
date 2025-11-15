@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FiPackage, FiTruck, FiCalendar, FiDollarSign, FiArrowRight, FiCheck, FiClock, FiX } from "react-icons/fi";
@@ -22,9 +21,12 @@ export default function HistoryPage() {
 
     const fetchTransactions = async () => {
       const isNextAuthLoggedIn = status === 'authenticated' && session?.user?.id_user;
-      const jwtToken = Cookies.get("access_token");
+      const res = await fetch("/api/me", {
+        credentials: "include",
+      });
+      const data = await res.json();
       
-      if (!isNextAuthLoggedIn && !jwtToken) {
+      if (!isNextAuthLoggedIn && !data?.user?.id_user) {
         alert("Silakan login terlebih dahulu!");
         router.push("/login");
         return;

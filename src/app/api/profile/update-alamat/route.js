@@ -45,4 +45,3 @@ export async function PUT(req) {
     }, { status: 500 });
   }
 }
-

@@ -22,18 +22,28 @@ export default function PaymentPage() {
   useEffect(() => {
     if (status === 'loading') return;
 
-    const isNextAuthLoggedIn = status === 'authenticated' && session?.user?.id_user;
-    const jwtToken = Cookies.get("access_token");
-    
-    if (!isNextAuthLoggedIn && !jwtToken) {
-      alert("Silakan login terlebih dahulu!");
-      router.push("/login");
-      return;
-    }
+    const init = async () => {
+      try {
+        const isNextAuthLoggedIn = status === 'authenticated' && session?.user?.id_user;
+        const res = await fetch("/api/me", {
+          credentials: "include"
+        });
+        const data = await res.json();
 
-    fetchCart();
-    fetchJasa();
-    fetchUserAlamat();
+        if (!isNextAuthLoggedIn && !data?.user?.id_user) {
+          alert("Silakan login terlebih dahulu!");
+          router.push("/login");
+          return;
+        }
+
+        // Load data (can run concurrently)
+        await Promise.all([fetchCart(), fetchJasa(), fetchUserAlamat()]);
+      } catch (err) {
+        console.error('Error initializing payment page:', err);
+      }
+    };
+
+    init();
   }, [status, session, router]);
 
   const fetchCart = async () => {

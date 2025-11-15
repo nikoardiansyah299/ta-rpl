@@ -53,7 +53,7 @@ export async function GET(req) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 15 * 60, // 15 menit
+        maxAge: 15 * 60,
         path: "/",
       });
 
@@ -61,7 +61,7 @@ export async function GET(req) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60, // 7 hari
+        maxAge: 7 * 24 * 60 * 60,
         path: "/",
       });
 
@@ -99,7 +99,7 @@ export async function GET(req) {
       { expiresIn: "15m" }
     );
 
-    // (Opsional) generate refresh token baru juga
+    // generate refresh token baru juga
     const newRefreshToken = jwt.sign(
       { id_user: user.id_user, email: user.email },
       process.env.REFRESH_TOKEN_SECRET,
@@ -126,7 +126,7 @@ export async function GET(req) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60, // 15 menit
+      maxAge: 15 * 60,
       path: "/",
     });
 
@@ -134,7 +134,7 @@ export async function GET(req) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60, // 7 hari
+      maxAge: 7 * 24 * 60 * 60,
       path: "/",
     });
 

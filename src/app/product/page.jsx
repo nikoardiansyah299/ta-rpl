@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductCard from "@/components/ProductCard";
+import Image from 'next/image';
 
 export default function ProductPage() {
   const [produk, setProduk] = useState([]);
@@ -50,28 +51,29 @@ export default function ProductPage() {
 
   return (
     <div>
-      <Navbar textColor='text-black'/>
-      <div className='flex flex-col justify-center gap-30 h-96 bg-gradient-to-t from-white to-black/20'>
-        <div className='justify-center items-start flex flex-col gap-6'>
-          <h1 className='text-5xl font-semibold ml-20'>Indonesian Marine Fish Products</h1>
+      <Navbar textColor='text-white'/>
+      <div className='relative flex flex-col justify-center gap-30 h-screen bg-gradient-to-t from-white to-black/20'>
+        <Image src={"/product-fish/hero.jpeg"} fill alt="Hero image" className='object-cover w-full h-full' />
+        <div className='absolute justify-center items-center top-1/2 left-1/4 px-10 py-5 bg-[#ebeff0]/90 rounded-lg m-auto flex flex-col gap-6'>
+          <h1 className='text-5xl font-semibold '>Indonesian Marine Fish Products</h1>
           <input 
             type="text" 
             placeholder="Search products..." 
-            className="w-1/2 p-2 border border-gray-300 ml-20 rounded-md mb-4"
+            className="w-1/2 p-2 border border-blue-600 rounded-md mb-4 outline-none"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-8 px-10 py-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-10 py-10">
         {loading ? (
           <p className="col-span-3 text-center text-gray-500">Loading products...</p>
         ) : filteredProduk.length > 0 ? (
           filteredProduk.map((prod) => <ProductCard key={prod.id_produk} product={prod} />)
         ) : (
           <p className="col-span-3 text-center text-gray-500">
-            Tidak ada produk di kategori ini.
+            No Product Found.
           </p>
         )}
       </div>

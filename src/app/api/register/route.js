@@ -36,12 +36,12 @@ export async function POST(req) {
     const accessToken = jwt.sign(
         {id_user: newUser.id_user, email: newUser.email},
         process.env.ACCESS_TOKEN_SECRET,
-        {expiresIn: "1d"}
+        {expiresIn: "15m"}
     )
     const refreshToken = jwt.sign(
         {id_user: newUser.id_user, email: newUser.email},
         process.env.REFRESH_TOKEN_SECRET,
-        {expiresIn: "1d"}
+        {expiresIn: "7d"}
     )
 
     await prisma.users.update({
@@ -63,14 +63,14 @@ export async function POST(req) {
 
     response.cookies.set("access_token", accessToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.ENV.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 15 * 60,
         path: "/"
     });
     response.cookies.set("refresh_token", refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.ENV.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60,
         path: "/"

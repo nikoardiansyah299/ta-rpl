@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Cookies from "js-cookie";
@@ -31,7 +31,7 @@ const Notification = ({ message, type = 'success', onClose }) => {
             )}
             </div>
             <div className="flex-1">
-            <p className="font-medium">{message}</p>
+                <p className="font-medium">{message}</p>
             </div>
             <button
             onClick={onClose}
@@ -49,7 +49,8 @@ const Notification = ({ message, type = 'success', onClose }) => {
 export default function ProductDetail({ params }) {
     const router = useRouter();
     const { data: session } = useSession();
-    const resolvedParams = use(params);
+    // params is provided by Next.js router for client component
+    const resolvedParams = params;
     const [loading, setLoading] = useState(false);
     const [product, setProduct] = useState(null);
     const [productLoading, setProductLoading] = useState(true);
@@ -111,9 +112,12 @@ export default function ProductDetail({ params }) {
     const handleAddToCart = async () => {
         // Cek apakah user sudah login (NextAuth atau JWT)
         const isNextAuthLoggedIn = session?.user?.id_user;
-        const jwtToken = Cookies.get("access_token");
+        const res = await fetch("/api/me", {
+            credetials: "include"
+        })
+        const data = await res.json();
         
-        if (!isNextAuthLoggedIn && !jwtToken) {
+        if (!isNextAuthLoggedIn && !data?.user?.id_user) {
             alert("Silakan login terlebih dahulu!");
             router.push("/login");
             return;
@@ -148,9 +152,12 @@ export default function ProductDetail({ params }) {
     const handleOrderNow = async () => {
         // Cek apakah user sudah login (NextAuth atau JWT)
         const isNextAuthLoggedIn = session?.user?.id_user;
-        const jwtToken = Cookies.get("access_token");
+        const res = fetch("/api/me", {
+            credentials: "include"
+        })
+        const data = await res.json();
         
-        if (!isNextAuthLoggedIn && !jwtToken) {
+        if (!isNextAuthLoggedIn && !data?.user?.id_user) {
             alert("Silakan login terlebih dahulu!");
             router.push("/login");
             return;
