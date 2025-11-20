@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getUserIdFromRequest } from "@/lib/authHelper";
+import { initializeTransactionTracking } from "@/lib/trackingHelper";
 
 export async function POST(req) {
   try {
@@ -39,7 +40,7 @@ export async function POST(req) {
 
     // === START TRANSACTION ===
     const result = await prisma.$transaction(async (tx) => {
-      // 1️⃣ Buat transaksi utama
+      // Buat transaksi utama
       const transaksi = await tx.transaksi.create({
         data: {
           id_user: userId,
@@ -49,7 +50,7 @@ export async function POST(req) {
         },
       });
 
-      // 2️⃣ Simpan detail transaksi per produk
+      //Simpan detail transaksi per produk
       for (const item of cartItems) {
         await tx.detail_transaksi.create({
           data: {
@@ -61,12 +62,19 @@ export async function POST(req) {
         });
       }
 
-      // 3️⃣ Kosongkan keranjang user
       await tx.keranjang.deleteMany({ where: { id_user: userId } });
 
       return transaksi;
     });
-    // === END TRANSACTION ===
+
+    // Initialize tracking after the transaction has been committed
+    try {
+      await initializeTransactionTracking(result.id_transaksi);
+      console.log(`Tracking initialized for transaction ${result.id_transaksi}`);
+    } catch (trackingError) {
+      console.error('Tracking initialization failed:', trackingError);
+      // Do not fail the payment response if tracking initialization fails
+    }
 
     return new Response(
       JSON.stringify({

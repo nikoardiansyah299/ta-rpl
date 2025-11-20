@@ -40,6 +40,7 @@ model transaksi {
   users            users                       @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_1")
   jasa_pengirim    jasa_pengirim               @relation(fields: [id_pengiriman], references: [id_pengiriman], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_2")
   detail_transaksi detail_transaksi[]
+  tracking_transaksi tracking_transaksi[]
 
   @@index([id_pengiriman], map: "id_pengiriman")
   @@index([id_user], map: "id_user")
@@ -72,6 +73,18 @@ model detail_transaksi {
   @@index([id_produk])
 }
 
+model tracking_transaksi {
+  id_tracking       Int      @id @default(autoincrement())
+  id_transaksi      Int
+  status_tracking   String   @db.VarChar(100)
+  deskripsi         String   @db.Text
+  tanggal_tracking  DateTime @default(now()) @db.Timestamp(0)
+  created_at        DateTime @default(now()) @db.Timestamp(0)
+
+  transaksi transaksi @relation(fields: [id_transaksi], references: [id_transaksi], onDelete: Cascade)
+
+  @@index([id_transaksi])
+}
 
 model users {
   id_user   Int         @id @default(autoincrement())

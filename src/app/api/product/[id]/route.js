@@ -8,10 +8,11 @@ export async function GET(request, { params }) {
     });
 
     if (!product) {
-      return NextResponse.json({ message: "Produk tidak ditemukan" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Produk tidak ditemukan" }, { status: 404 }
+      );
     }
 
-    // Map kolom gambar -> image_url untuk kompatibilitas frontend
     return NextResponse.json({
       ...product,
       image_url: product.gambar || null,

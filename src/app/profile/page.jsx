@@ -71,7 +71,6 @@ const ProfilePage = () => {
                         username: userData.username || "",
                         email: userData.email || "",
                         alamat: userData.alamat || "",
-                        phone: userData.phone || ""
                     });
                 }
             } catch (err) {
@@ -201,9 +200,17 @@ const ProfilePage = () => {
                             transition={{ delay: 0.2 }}
                             className="w-32 h-32 mx-auto mb-6 relative"
                         >
-                            <div className="w-full h-full rounded-full bg-gradient-to-r from-blue-600 to-blue-400 flex items-center justify-center text-white text-4xl font-bold">
-                                {user.username?.charAt(0).toUpperCase() || 'U'}
-                            </div>
+                            {user.image ? (
+                                <img 
+                                    src={user.image} 
+                                    alt={user.username} 
+                                    className="w-full h-full rounded-full object-cover shadow-lg border-4 border-white"
+                                />
+                            ) : (
+                                <div className="w-full h-full rounded-full bg-gradient-to-r from-blue-600 to-blue-400 flex items-center justify-center text-white text-4xl font-bold">
+                                    {user.username?.charAt(0).toUpperCase() || 'U'}
+                                </div>
+                            )}
                             <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white"></div>
                         </motion.div>
                         
@@ -211,7 +218,7 @@ const ProfilePage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="text-4xl font-bold text-gray-900 mb-2"
+                            className="text-2xl md:text-4xl font-bold text-gray-900 mb-2"
                         >
                             {user.username}
                         </motion.h1>
@@ -219,14 +226,14 @@ const ProfilePage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
-                            className="text-lg text-gray-600"
+                            className="text-sm ms:text-lg text-gray-600"
                         >
                             {user.email}
                         </motion.p>
                     </div>
 
                     {/* Stats Cards */}
-                    <motion.div
+                    {/* <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
@@ -246,7 +253,7 @@ const ProfilePage = () => {
                                 <p className="text-gray-600">{stat.label}</p>
                             </motion.div>
                         ))}
-                    </motion.div>
+                    </motion.div> */}
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         {/* Sidebar Navigation */}
@@ -399,109 +406,108 @@ const ProfilePage = () => {
                                 </motion.div>
                             )}
 
-                                                        {activeTab === 'security' && (
-                                                                <motion.div
-                                                                    key="security"
-                                                                    initial={{ opacity: 0 }}
-                                                                    animate={{ opacity: 1 }}
-                                                                    exit={{ opacity: 0 }}
-                                                                    className="space-y-6"
-                                                                >
-                                                                    <div className="flex justify-between items-center mb-4">
-                                                                        <h2 className="text-2xl font-bold text-gray-900">Security & Safety</h2>
+                            {activeTab === 'security' && (
+                                <motion.div
+                                    key="security"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="space-y-6"
+                                >
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-2xl font-bold text-gray-900">Security & Safety</h2>
+                                    </div>
+
+                                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+                                        <h3 className="font-semibold text-lg text-blue-800 mb-2">Perhatian Keamanan</h3>
+                                        <p className="text-gray-700 mb-3">Harap berhati-hati saat memasukkan data ke situs ini. Lindungi informasi pribadi Anda seperti alamat, nomor telepon, dan detail pembayaran. Ikuti praktik keamanan standar untuk melindungi akun Anda.</p>
+                                        <ul className="list-disc list-inside text-gray-700 space-y-2">
+                                            <li>Gunakan kata sandi yang kuat dan unik untuk akun Anda.</li>
+                                            <li>Hindari membagikan token atau kredensial melalui pesan/email.</li>
+                                            <li>Pastikan Anda menggunakan jaringan yang aman (hindari Wi‑Fi publik saat melakukan transaksi sensitif).</li>
+                                            <li>Waspadai tautan atau email phising yang mengatasnamakan layanan kami—kami tidak akan meminta kata sandi melalui email.</li>
+                                            <li>Periksa URL situs sebelum memasukkan informasi sensitif, pastikan menggunakan HTTPS.</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                                        <h4 className="font-semibold text-gray-900 mb-2">Tips Profesional</h4>
+                                        <p className="text-gray-700 mb-3">Sebagai praktik terbaik, kami menyarankan:</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="p-3 border rounded-lg bg-gray-50">
+                                                <p className="font-medium text-gray-800">Perbarui Kata Sandi Secara Berkala</p>
+                                                <p className="text-sm text-gray-600">Ganti kata sandi setiap beberapa bulan dan gunakan manajer kata sandi jika perlu.</p>
+                                            </div>
+                                            <div className="p-3 border rounded-lg bg-gray-50">
+                                                <p className="font-medium text-gray-800">Aktifkan Autentikasi Dua Faktor</p>
+                                                <p className="text-sm text-gray-600">Jika tersedia, aktifkan 2FA untuk lapisan perlindungan tambahan pada akun Anda.</p>
+                                            </div>
+                                            <div className="p-3 border rounded-lg bg-gray-50">
+                                                <p className="font-medium text-gray-800">Konfirmasi Transaksi</p>
+                                                <p className="text-sm text-gray-600">Periksa ringkasan pesanan sebelum menyelesaikan pembayaran.</p>
+                                            </div>
+                                            <div className="p-3 border rounded-lg bg-gray-50">
+                                                <p className="font-medium text-gray-800">Laporkan Aktivitas Mencurigakan</p>
+                                                <p className="text-sm text-gray-600">Segera hubungi tim dukungan jika melihat aktivitas tidak biasa pada akun Anda.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                            {activeTab === 'orders' && (
+                                <motion.div
+                                    key="orders"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="space-y-6"
+                                >
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-2xl font-bold text-gray-900">My Orders</h2>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                                        {ordersLoading ? (
+                                            <p className="text-gray-500">Loading orders...</p>
+                                        ) : ordersError ? (
+                                            <p className="text-red-600">{ordersError}</p>
+                                        ) : orders.length === 0 ? (
+                                            <p className="text-gray-600">You have no orders yet.</p>
+                                        ) : (
+                                            <div className="space-y-4" onClick={() => router.push('/history')}>
+                                                {orders.map((tx) => (
+                                                    <div key={tx.id_transaksi} className="border rounded-lg p-4">
+                                                        <div className="flex items-center justify-between mb-3">
+                                                            <div>
+                                                                <p className="text-sm text-gray-600">Order ID: <span className="font-medium text-gray-900">{tx.id_transaksi}</span></p>
+                                                                <p className="text-sm text-gray-600">Date: <span className="font-medium text-gray-900">{new Date(tx.tgl_transaksi).toLocaleString()}</span></p>
+                                                            </div>
+                                                            <div className="text-sm text-gray-700">Status: <span className="font-semibold">{tx.status_transaksi || 'Pending'}</span></div>
+                                                        </div>
+
+                                                        <div className="divide-y">
+                                                            {tx.detail_transaksi?.map((d) => (
+                                                                <div key={d.id_detail} className="py-3 flex flex-col md:flex gap-4 items-center">
+                                                                    <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden shrink-0">
+                                                                        <img src={d.produk?.gambar || d.produk?.image_url || '/product-fish/default.png'} alt={d.produk?.nama_produk} className="w-full h-full object-cover" />
                                                                     </div>
-
-                                                                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
-                                                                        <h3 className="font-semibold text-lg text-blue-800 mb-2">Perhatian Keamanan</h3>
-                                                                        <p className="text-gray-700 mb-3">Harap berhati-hati saat memasukkan data ke situs ini. Lindungi informasi pribadi Anda seperti alamat, nomor telepon, dan detail pembayaran. Ikuti praktik keamanan standar untuk melindungi akun Anda.</p>
-                                                                        <ul className="list-disc list-inside text-gray-700 space-y-2">
-                                                                            <li>Gunakan kata sandi yang kuat dan unik untuk akun Anda.</li>
-                                                                            <li>Hindari membagikan token atau kredensial melalui pesan/email.</li>
-                                                                            <li>Pastikan Anda menggunakan jaringan yang aman (hindari Wi‑Fi publik saat melakukan transaksi sensitif).</li>
-                                                                            <li>Waspadai tautan atau email phising yang mengatasnamakan layanan kami—kami tidak akan meminta kata sandi melalui email.</li>
-                                                                            <li>Periksa URL situs sebelum memasukkan informasi sensitif, pastikan menggunakan HTTPS.</li>
-                                                                        </ul>
+                                                                    <div className="flex-1">
+                                                                        <p className="font-medium text-gray-900">{d.produk?.nama_produk}</p>
+                                                                        <p className="text-sm text-gray-600">Qty: {d.jumlah_kg} kg</p>
                                                                     </div>
-
-                                                                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                                                                        <h4 className="font-semibold text-gray-900 mb-2">Tips Profesional</h4>
-                                                                        <p className="text-gray-700 mb-3">Sebagai praktik terbaik, kami menyarankan:</p>
-                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                            <div className="p-3 border rounded-lg bg-gray-50">
-                                                                                <p className="font-medium text-gray-800">Perbarui Kata Sandi Secara Berkala</p>
-                                                                                <p className="text-sm text-gray-600">Ganti kata sandi setiap beberapa bulan dan gunakan manajer kata sandi jika perlu.</p>
-                                                                            </div>
-                                                                            <div className="p-3 border rounded-lg bg-gray-50">
-                                                                                <p className="font-medium text-gray-800">Aktifkan Autentikasi Dua Faktor</p>
-                                                                                <p className="text-sm text-gray-600">Jika tersedia, aktifkan 2FA untuk lapisan perlindungan tambahan pada akun Anda.</p>
-                                                                            </div>
-                                                                            <div className="p-3 border rounded-lg bg-gray-50">
-                                                                                <p className="font-medium text-gray-800">Konfirmasi Transaksi</p>
-                                                                                <p className="text-sm text-gray-600">Periksa ringkasan pesanan sebelum menyelesaikan pembayaran.</p>
-                                                                            </div>
-                                                                            <div className="p-3 border rounded-lg bg-gray-50">
-                                                                                <p className="font-medium text-gray-800">Laporkan Aktivitas Mencurigakan</p>
-                                                                                <p className="text-sm text-gray-600">Segera hubungi tim dukungan jika melihat aktivitas tidak biasa pada akun Anda.</p>
-                                                                            </div>
-                                                                        </div>
+                                                                    <div className="text-right">
+                                                                        <p className="font-semibold text-gray-900">Rp {d.subtotal?.toLocaleString()}</p>
                                                                     </div>
-                                                                </motion.div>
-                                                        )}
-
-                                                                                    {activeTab === 'orders' && (
-                                                                                            <motion.div
-                                                                                                key="orders"
-                                                                                                initial={{ opacity: 0 }}
-                                                                                                animate={{ opacity: 1 }}
-                                                                                                exit={{ opacity: 0 }}
-                                                                                                className="space-y-6"
-                                                                                            >
-                                                                                                <div className="flex justify-between items-center mb-4">
-                                                                                                    <h2 className="text-2xl font-bold text-gray-900">My Orders</h2>
-                                                                                                </div>
-
-                                                                                                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                                                                                                    {ordersLoading ? (
-                                                                                                        <p className="text-gray-500">Loading orders...</p>
-                                                                                                    ) : ordersError ? (
-                                                                                                        <p className="text-red-600">{ordersError}</p>
-                                                                                                    ) : orders.length === 0 ? (
-                                                                                                        <p className="text-gray-600">You have no orders yet.</p>
-                                                                                                    ) : (
-                                                                                                        <div className="space-y-4" onClick={() => router.push('/history')}>
-                                                                                                            {orders.map((tx) => (
-                                                                                                                <div key={tx.id_transaksi} className="border rounded-lg p-4">
-                                                                                                                    <div className="flex items-center justify-between mb-3">
-                                                                                                                        <div>
-                                                                                                                            <p className="text-sm text-gray-600">Order ID: <span className="font-medium text-gray-900">{tx.id_transaksi}</span></p>
-                                                                                                                            <p className="text-sm text-gray-600">Date: <span className="font-medium text-gray-900">{new Date(tx.tgl_transaksi).toLocaleString()}</span></p>
-                                                                                                                        </div>
-                                                                                                                        <div className="text-sm text-gray-700">Status: <span className="font-semibold">{tx.status_transaksi || 'Pending'}</span></div>
-                                                                                                                    </div>
-
-                                                                                                                    <div className="divide-y">
-                                                                                                                        {tx.detail_transaksi?.map((d) => (
-                                                                                                                            <div key={d.id_detail} className="py-3 flex gap-4 items-center">
-                                                                                                                                <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden shrink-0">
-                                                                                                                                    <img src={d.produk?.gambar || d.produk?.image_url || '/product-fish/default.png'} alt={d.produk?.nama_produk} className="w-full h-full object-cover" />
-                                                                                                                                </div>
-                                                                                                                                <div className="flex-1">
-                                                                                                                                    <p className="font-medium text-gray-900">{d.produk?.nama_produk}</p>
-                                                                                                                                    <p className="text-sm text-gray-600">Qty: {d.jumlah_kg} kg</p>
-                                                                                                                                </div>
-                                                                                                                                <div className="text-right">
-                                                                                                                                    <p className="font-semibold text-gray-900">Rp {d.subtotal?.toLocaleString()}</p>
-                                                                                                                                </div>
-                                                                                                                            </div>
-                                                                                                                        ))}
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                            ))}
-                                                                                                        </div>
-                                                                                                    )}
-                                                                                                </div>
-                                                                                            </motion.div>
-                                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
 
                             {/* Tab Security dan Orders tetap seperti sebelumnya */}
                             </AnimatePresence>

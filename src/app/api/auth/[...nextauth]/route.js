@@ -13,18 +13,16 @@ export const authOptions = {
   callbacks: {
     async signIn({ user }) {
       try {
-        // cek apakah user udah ada
         const existingUser = await prisma.users.findUnique({
           where: { email: user.email },
         });
 
         if (!existingUser) {
-          // kalau belum ada → auto register
           await prisma.users.create({
             data: {
               username: user.name || user.email.split("@")[0],
               email: user.email,
-              password: "", // kosong (karena login by Google)
+              password: "",
             },
           });
         }
@@ -36,7 +34,7 @@ export const authOptions = {
       }
     },
 
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, profile }) {
       // Saat pertama kali login (user ada)
       if (user) {
         const dbUser = await prisma.users.findUnique({
@@ -47,6 +45,9 @@ export const authOptions = {
           token.id_user = dbUser.id_user;
           token.email = dbUser.email;
         }
+      }
+      if (profile?.picture) {
+        token.picture = profile.picture;
       }
 
       return token;
@@ -67,6 +68,7 @@ export const authOptions = {
       if (dbUser) {
         session.user.id_user = dbUser.id_user;
         session.user.username = dbUser.username;
+        session.user.image = token.picture || session.user.image || dbUser.image;
       }
 
       return session;

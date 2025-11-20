@@ -202,9 +202,9 @@ export default function Navbar({ serverSession, textColor = 'text-white' }) {
             <li><Link href="/contact" onClick={() => setIsMenuOpen(false)}>Contact Me</Link></li>
             <li><Link href="/cart" onClick={() => setIsMenuOpen(false)} className="flex gap-2 items-center"><IoCartOutline />Cart</Link></li>
             {username ? (
-              <li><Link href={"/profile"} onClick={() => { setIsMenuOpen(false); handleLogout(); }} >Profile</Link></li>
+              <li><Link href={"/profile"} onClick={() => { setIsMenuOpen(false); }} >Profile</Link></li>
             ) : (
-              <li><Link href="/login" onClick={() => setIsMenuOpen(false)} >Sign in</Link></li>
+              <li><Link href="/login" onClick={() => setIsMenuOpen(false)} >Login</Link></li>
             )}
           </ul>
         </nav>

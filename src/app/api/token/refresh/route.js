@@ -7,21 +7,20 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(req) {
   try {
-    // Cek NextAuth session terlebih dahulu (untuk Google Auth users)
     const session = await getServerSession(authOptions);
     
     if (session?.user?.id_user) {
-      // User login via NextAuth (Google Auth)
-      // Generate token baru dari session
       const user = await prisma.users.findUnique({
         where: { id_user: session.user.id_user },
       });
 
       if (!user) {
-        return NextResponse.json({ message: "User tidak ditemukan" }, { status: 404 });
+        return NextResponse.json(
+          { 
+            message: "User tidak ditemukan" 
+          }, { status: 404 });
       }
 
-      // Generate access token dan refresh token baru
       const newAccessToken = jwt.sign(
         { id_user: user.id_user, email: user.email },
         process.env.ACCESS_TOKEN_SECRET,
@@ -33,13 +32,11 @@ export async function GET(req) {
         { expiresIn: "7d" }
       );
 
-      // Update DB dengan refresh token baru
       await prisma.users.update({
         where: { id_user: user.id_user },
         data: { token: newRefreshToken },
       });
 
-      // Set cookies
       const response = NextResponse.json({
         message: "Access token diperbarui",
         user: {

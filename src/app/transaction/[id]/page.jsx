@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import PackageTracking from "@/components/PackageTracking";
 
 // animejs removed — using GSAP for the tracking-item stagger animation instead
 import { 
@@ -294,44 +295,8 @@ export default function TransactionPage({ params }) {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Package Tracking */}
-            <div ref={addToCardsRef} className="bg-white rounded-3xl shadow-xl p-8 border border-gray-200">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <FiTruck className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Lacak Pengiriman</h2>
-                  <p className="text-gray-600">Perjalanan pesanan Anda hingga sampai di tujuan</p>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                {packageTracking.map((track, index) => (
-                  <div key={index} className="tracking-item flex items-start gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      index === 0 ? 'bg-blue-100' : 'bg-gray-100'
-                    }`}>
-                      <track.icon className={`w-6 h-6 ${track.color}`} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900 text-lg">{track.title}</h3>
-                        <span className="text-sm text-gray-500">
-                          {track.date.toLocaleDateString('id-ID', { 
-                            day: 'numeric', 
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-gray-600">{track.description}</p>
-                    </div>
-                    {index < packageTracking.length - 1 && (
-                      <div className="absolute left-6 top-16 w-0.5 h-12 bg-gray-200 ml-5"></div>
-                    )}
-                  </div>
-                ))}
-              </div>
+            <div ref={addToCardsRef}>
+              <PackageTracking transactionId={transaction.id_transaksi} />
             </div>
 
             {/* Product Details */}

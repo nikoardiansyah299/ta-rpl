@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
 
-
 export async function POST(req) {
   try {
     const { email, password } = await req.json();

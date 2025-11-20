@@ -1,11 +1,11 @@
-// app/api/transaction/[id]/route.js
+// app/api/tracking/[id_transaksi]/route.js
 import { prisma } from "@/lib/prisma";
 import { getUserIdFromRequest } from "@/lib/authHelper";
 
 export async function GET(req, { params }) {
   try {
-    // 🔧 FIX: Await params
-    const { id } = await params;
+    // 🔧 FIX: Await params terlebih dahulu
+    const { id_transaksi } = await params;
     
     const { userId, authType } = await getUserIdFromRequest(req);
     
@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
       }, { status: 401 });
     }
 
-    const transactionId = parseInt(id);
+    const transactionId = parseInt(id_transaksi);
     
     if (isNaN(transactionId)) {
       return Response.json({ 
@@ -25,51 +25,40 @@ export async function GET(req, { params }) {
       }, { status: 400 });
     }
 
-    console.log(`Transaction Detail: User ${userId} requesting transaction ${transactionId}`);
-
-    // Ambil data transaksi yang hanya dimiliki oleh user tersebut
-    const transaksi = await prisma.transaksi.findFirst({
+    // Verifikasi bahwa transaksi memang milik user
+    const transaction = await prisma.transaksi.findFirst({
       where: { 
         id_transaksi: transactionId,
         id_user: userId 
-      },
-      include: {
-        jasa_pengirim: true,
-        detail_transaksi: {
-          include: {
-            produk: {
-              select: {
-                id_produk: true,
-                nama_produk: true,
-                harga_kg: true,
-                gambar: true
-              }
-            }
-          }
-        },
-        tracking_transaksi: {
-          orderBy: {
-            tanggal_tracking: 'asc'
-          }
-        }
       }
     });
 
-    if (!transaksi) {
+    if (!transaction) {
       return Response.json({ 
         message: "Transaksi tidak ditemukan",
         error: "Transaction not found" 
       }, { status: 404 });
     }
 
+    // Ambil data tracking
+    const trackingData = await prisma.tracking_transaksi.findMany({
+      where: { 
+        id_transaksi: transactionId 
+      },
+      orderBy: {
+        tanggal_tracking: 'asc'
+      }
+    });
+
     return Response.json({ 
-      transaksi
+      success: true,
+      tracking_history: trackingData
     });
     
   } catch (error) {
-    console.error("Transaction detail error:", error);
+    console.error("Tracking fetch error:", error);
     return Response.json({ 
-      message: error.message || "Gagal memuat detail transaksi",
+      message: error.message || "Gagal memuat data tracking",
       error: error.message 
     }, { status: 500 });
   }
