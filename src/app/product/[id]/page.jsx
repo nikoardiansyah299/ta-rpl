@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ReviewProduct from "@/components/ReviewProduct";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -51,7 +52,8 @@ export default function ProductDetail({ params }) {
     const { data: session } = useSession();
     // params is provided by Next.js router for client component
     const resolvedParams = params;
-    const [loading, setLoading] = useState(false);
+    const [loadingAddToCart, setLoadingAddToCart] = useState(false);
+    const [loadingOrderNow, setLoadingOrderNow] = useState(false);
     const [product, setProduct] = useState(null);
     const [productLoading, setProductLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -113,8 +115,8 @@ export default function ProductDetail({ params }) {
         // Cek apakah user sudah login (NextAuth atau JWT)
         const isNextAuthLoggedIn = session?.user?.id_user;
         const res = await fetch("/api/me", {
-            credetials: "include"
-        })
+            credentials: "include"
+        });
         const data = await res.json();
         
         if (!isNextAuthLoggedIn && !data?.user?.id_user) {
@@ -123,7 +125,7 @@ export default function ProductDetail({ params }) {
             return;
         }
 
-        setLoading(true);
+        setLoadingAddToCart(true);
         try {
             const res = await fetch("/api/cart/add", {
                 method: "POST",
@@ -145,16 +147,16 @@ export default function ProductDetail({ params }) {
             console.error(err);
             showNotification(err.message, "error");
         } finally {
-            setLoading(false);
+            setLoadingAddToCart(false);
         }
     };
 
     const handleOrderNow = async () => {
         // Cek apakah user sudah login (NextAuth atau JWT)
         const isNextAuthLoggedIn = session?.user?.id_user;
-        const res = fetch("/api/me", {
+        const res = await fetch("/api/me", {
             credentials: "include"
-        })
+        });
         const data = await res.json();
         
         if (!isNextAuthLoggedIn && !data?.user?.id_user) {
@@ -163,7 +165,7 @@ export default function ProductDetail({ params }) {
             return;
         }
 
-        setLoading(true);
+        setLoadingOrderNow(true);
         try {
             // Tambahkan produk ke keranjang dulu
             const res = await fetch("/api/cart/add", {
@@ -188,7 +190,7 @@ export default function ProductDetail({ params }) {
             console.error(err);
             alert(err.message);
         } finally {
-            setLoading(false);
+            setLoadingOrderNow(false);
         }
     };
 
@@ -223,7 +225,7 @@ export default function ProductDetail({ params }) {
         <>
         <Navbar textColor="text-black"/>
             <div className="min-h-screen flex flex-col items-center justify-center py-10 px-6">
-                <div className="max-w-4xl w-full bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div className="max-w-4xl w-full bg-white rounded-2xl shadow-lg overflow-hidden mt-5">
                     <div className="flex flex-col md:flex-row">
                         <div className="relative w-full md:w-1/2 h-[400px]">
                             {product.image_url ? (
@@ -312,17 +314,17 @@ export default function ProductDetail({ params }) {
                         <div className="flex gap-5 items-end w-full">
                             <button
                             onClick={handleAddToCart}
-                            disabled={loading || !quantity}
+                            disabled={loadingAddToCart || !quantity}
                             className="mt-6 bg-gray-200 text-blue-800 py-2 px-8 rounded-sm border border-blue-800 transition disabled:opacity-50"
                             >
-                            {loading ? "Adding..." : "Add To Cart"}
+                            {loadingAddToCart ? "Adding..." : "Add To Cart"}
                             </button>
                             <button
                             onClick={handleOrderNow}
-                            disabled={loading || !quantity}
+                            disabled={loadingOrderNow || !quantity}
                             className="mt-6 bg-blue-800 text-white py-2 px-8 rounded-sm hover:bg-blue-900 transition disabled:opacity-50"
                             >
-                            {loading ? "Processing..." : "Order Now"}
+                            {loadingOrderNow ? "Processing..." : "Order Now"}
                             </button>
                         </div>
                         <Notification
@@ -332,6 +334,11 @@ export default function ProductDetail({ params }) {
                         />
                         </div>
                     </div>
+                </div>
+
+                {/* Review Section */}
+                <div className="max-w-4xl w-full mt-8">
+                    <ReviewProduct productId={resolvedParams.id} />
                 </div>
             </div>
         <Footer/>

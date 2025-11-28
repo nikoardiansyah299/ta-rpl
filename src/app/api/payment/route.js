@@ -33,8 +33,8 @@ export async function POST(req) {
 
     const metodeMap = {
       transfer_bank: "Bank",
-      e_wallet: "Dana",
-      cod: "Bank",
+      Visa: "Visa",
+      Paypal: "Paypal",
     };
     const metodeEnum = metodeMap[metode] || "Bank";
 

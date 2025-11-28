@@ -2,10 +2,11 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FiTruck, FiCreditCard, FiMapPin, FiPackage, FiCheck, FiArrowRight } from "react-icons/fi";
+import { CiBank } from "react-icons/ci";
+import { FaCcPaypal } from "react-icons/fa";
 
 export default function PaymentPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -14,7 +15,7 @@ export default function PaymentPage() {
   const [metode, setMetode] = useState("");
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [userAlamat, setUserAlamat] = useState("");
+  const [userAlamat, setUserAlamat] = useState(null);
   const [loadingAlamat, setLoadingAlamat] = useState(true);
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -69,7 +70,7 @@ export default function PaymentPage() {
       const res = await fetch("/api/me");
       const data = await res.json();
       if (res.ok && data.user) {
-        setUserAlamat(data.user.alamat || "");
+        setUserAlamat(data.user.alamat || null);
       }
     } catch (err) {
       console.error("Error fetching user address:", err);
@@ -108,9 +109,9 @@ export default function PaymentPage() {
   const grandTotal = total + ongkir;
 
   const paymentMethods = [
-    { value: "transfer_bank", label: "Transfer Bank", icon: "🏦" },
-    { value: "e_wallet", label: "E-Wallet (Dana)", icon: "📱" },
-    { value: "cod", label: "Cash on Delivery (COD)", icon: "💵" }
+    { value: "transfer_bank", label: "Transfer Bank", icon: <CiBank/> },
+    { value: "Visa", label: "Visa Debit Card", icon: <FiCreditCard/> },
+    { value: "Paypal", label: "Paypal", icon: <FaCcPaypal/> }
   ];
 
   return (
@@ -142,7 +143,34 @@ export default function PaymentPage() {
                   </div>
                 ) : userAlamat ? (
                   <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                    <p className="text-gray-800 font-medium">{userAlamat}</p>
+                    {typeof userAlamat === 'object' && userAlamat.negara ? (
+                      <div className="space-y-1">
+                        <p className="text-gray-800 font-medium">{userAlamat.jalan || ""}</p>
+                        <p className="text-gray-700">{userAlamat.kota || ""}, {userAlamat.negara || ""}</p>
+                        {userAlamat.detail && (
+                          <p className="text-sm text-gray-600 mt-2">{userAlamat.detail}</p>
+                        )}
+                      </div>
+                    ) : typeof userAlamat === 'string' ? (
+                      (() => {
+                        try {
+                          const parsed = JSON.parse(userAlamat);
+                          return (
+                            <div className="space-y-1">
+                              <p className="text-gray-800 font-medium">{parsed.jalan || ""}</p>
+                              <p className="text-gray-700">{parsed.kota || ""}, {parsed.negara || ""}</p>
+                              {parsed.detail && (
+                                <p className="text-sm text-gray-600 mt-2">{parsed.detail}</p>
+                              )}
+                            </div>
+                          );
+                        } catch (e) {
+                          return <p className="text-gray-800 font-medium">{userAlamat}</p>;
+                        }
+                      })()
+                    ) : (
+                      <p className="text-gray-800 font-medium">{String(userAlamat)}</p>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-6">
@@ -237,12 +265,175 @@ export default function PaymentPage() {
                     </button>
                   ))}
                 </div>
+
+                {/* Form Pembayaran berdasarkan Metode yang Dipilih */}
+                {metode && (
+                  <div className="mt-6 p-6 bg-gray-50 rounded-xl border-2 border-blue-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h3>
+                    
+                    {/* Form Transfer Bank */}
+                    {metode === "transfer_bank" && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nama Bank
+                          </label>
+                          <select className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white">
+                            <option value="">-- Pilih Bank --</option>
+                            <option value="bca">Bank Central Asia (BCA)</option>
+                            <option value="mandiri">Bank Mandiri</option>
+                            <option value="bni">Bank Negara Indonesia (BNI)</option>
+                            <option value="bri">Bank Rakyat Indonesia (BRI)</option>
+                            <option value="cimb">CIMB Niaga</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nomor Rekening
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Masukkan nomor rekening"
+                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nama Pemilik Rekening
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Nama sesuai rekening"
+                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                          />
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-sm text-blue-700">
+                            <strong>Catatan:</strong> Setelah memilih transfer bank, silakan transfer sesuai total pembayaran ke rekening yang tertera.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Form Visa Debit Card */}
+                    {metode === "Visa" && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nomor Kartu Debit
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="1234 5678 9012 3456"
+                            maxLength="19"
+                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                            onInput={(e) => {
+                              let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+                              let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                              e.target.value = formattedValue;
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nama di Kartu
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Nama sesuai kartu"
+                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Tanggal Kadaluarsa
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="MM/YY"
+                              maxLength="5"
+                              className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                              onInput={(e) => {
+                                let value = e.target.value.replace(/\D/g, '');
+                                if (value.length >= 2) {
+                                  value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                                }
+                                e.target.value = value;
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              CVV
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="123"
+                              maxLength="3"
+                              className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                              onInput={(e) => {
+                                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-sm text-blue-700">
+                            <strong>Keamanan:</strong> Informasi kartu Anda aman dan tidak akan disimpan.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Form PayPal */}
+                    {metode === "Paypal" && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Email PayPal
+                          </label>
+                          <input
+                            type="email"
+                            placeholder="email@paypal.com"
+                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Password PayPal
+                          </label>
+                          <input
+                            type="password"
+                            placeholder="Masukkan password PayPal"
+                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="paypal-save"
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <label htmlFor="paypal-save" className="text-sm text-gray-700">
+                            Simpan informasi untuk pembayaran selanjutnya
+                          </label>
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-sm text-blue-700">
+                            <strong>Informasi:</strong> Anda akan diarahkan ke halaman PayPal untuk menyelesaikan pembayaran.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Right Column - Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-12">
                 <h2 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-200">Order Summary</h2>
                 
                 <div className="space-y-4 mb-6">

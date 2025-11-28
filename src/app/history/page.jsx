@@ -85,7 +85,7 @@ export default function HistoryPage() {
 
   const getStatusText = (status) => {
     switch (status) {
-      case "pending": return "Menunggu Pembayaran";
+      case "pending": return "Order being processed";
       case "shipping": return "Sedang Dikirim";
       case "arrived": return "Pesanan Sampai";
       case "cancelled": return "Dibatalkan";
@@ -130,7 +130,7 @@ export default function HistoryPage() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">Riwayat Transaksi</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-3 mt-10">Transaction History</h1>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Lacak semua pesanan dan transaksi yang telah Anda lakukan
             </p>

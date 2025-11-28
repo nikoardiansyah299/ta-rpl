@@ -52,14 +52,14 @@ export default function ProductPage() {
   return (
     <div>
       <Navbar textColor='text-white'/>
-      <div className='relative flex flex-col justify-center gap-30 h-screen bg-gradient-to-t from-white to-black/20'>
+      <div className='relative flex flex-col justify-center gap-30 h-screen bg-linear-to-t from-white to-black/20'>
         <Image src={"/product-fish/hero.jpeg"} fill alt="Hero image" className='object-cover w-full h-full' />
-        <div className='absolute justify-center items-center top-1/2 left-1/4 px-10 py-5 bg-[#ebeff0]/90 rounded-lg m-auto flex flex-col gap-6'>
-          <h1 className='text-5xl font-semibold '>Indonesian Marine Fish Products</h1>
+        <div className='absolute justify-center items-center top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 sm:px-6 md:px-10 py-5 bg-[#ffffff] rounded-lg flex flex-col gap-4 sm:gap-6 w-11/12 sm:w-3/4 md:w-1/2 max-w-2xl'>
+          <h1 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-center'>Indonesian Marine Fish Products</h1>
           <input 
             type="text" 
             placeholder="Search products..." 
-            className="w-1/2 p-2 border border-blue-600 rounded-md mb-4 outline-none"
+            className="w-full sm:w-5/6 md:w-4/5 p-2 sm:p-3 border border-blue-600 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

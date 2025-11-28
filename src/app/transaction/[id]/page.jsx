@@ -167,7 +167,7 @@ export default function TransactionPage({ params }) {
 
   const getStatusText = (status) => {
     switch (status) {
-      case "pending": return "Menunggu Pembayaran";
+      case "pending": return "Order being processed";
       case "shipping": return "Sedang Dikirim";
       case "arrived": return "Pesanan Sampai";
       case "cancelled": return "Dibatalkan";

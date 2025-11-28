@@ -16,14 +16,14 @@ model jasa_pengirim {
 }
 
 model keranjang {
-  id_keranjang     Int    @id @default(autoincrement())
+  id_keranjang     Int @id @default(autoincrement())
   id_user          Int
   id_produk        Int
   jumlah_pembelian Int
   total_harga      Int
 
-  users            users  @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "keranjang_ibfk_1")
-  produk           produk @relation(fields: [id_produk], references: [id_produk], onDelete: NoAction, onUpdate: NoAction, map: "keranjang_ibfk_2")
+  users  users  @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "keranjang_ibfk_1")
+  produk produk @relation(fields: [id_produk], references: [id_produk], onDelete: NoAction, onUpdate: NoAction, map: "keranjang_ibfk_2")
 
   @@index([id_produk], map: "id_produk")
   @@index([id_user], map: "id_user")
@@ -36,50 +36,51 @@ model transaksi {
   metode_transaksi transaksi_metode_transaksi?
   tgl_transaksi    DateTime?                   @default(now()) @db.Timestamp(0)
   status_transaksi String?                     @default("pending") @db.VarChar(50)
-  
-  users            users                       @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_1")
-  jasa_pengirim    jasa_pengirim               @relation(fields: [id_pengiriman], references: [id_pengiriman], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_2")
-  detail_transaksi detail_transaksi[]
+
+  users              users                @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_1")
+  jasa_pengirim      jasa_pengirim        @relation(fields: [id_pengiriman], references: [id_pengiriman], onDelete: NoAction, onUpdate: NoAction, map: "transaksi_ibfk_2")
+  detail_transaksi   detail_transaksi[]
   tracking_transaksi tracking_transaksi[]
+  notifications      Notification[]
 
   @@index([id_pengiriman], map: "id_pengiriman")
   @@index([id_user], map: "id_user")
 }
 
 model produk {
-  id_produk   Int         @id @default(autoincrement())
-  nama_produk String      @db.VarChar(100)
-  stok_kg     Int?        @default(0)
-  harga_kg    Int
-  deskripsi   String?     @db.Text
-  status      String?     @db.VarChar(50)
-  gambar      String?     @db.VarChar(255)
-  keranjang   keranjang[]
+  id_produk        Int                @id @default(autoincrement())
+  nama_produk      String             @db.VarChar(100)
+  stok_kg          Int?               @default(0)
+  harga_kg         Int
+  deskripsi        String?            @db.Text
+  status           String?            @db.VarChar(50)
+  gambar           String?            @db.VarChar(255)
+  keranjang        keranjang[]
   detail_transaksi detail_transaksi[]
-
+  review_produk    review_produk[]
 }
 
 model detail_transaksi {
-  id_detail       Int       @id @default(autoincrement())
-  id_transaksi    Int
-  id_produk       Int
-  jumlah_kg       Int
-  subtotal        Int
+  id_detail    Int @id @default(autoincrement())
+  id_transaksi Int
+  id_produk    Int
+  jumlah_kg    Int
+  subtotal     Int
 
-  transaksi       transaksi @relation(fields: [id_transaksi], references: [id_transaksi])
-  produk          produk    @relation(fields: [id_produk], references: [id_produk])
+  transaksi transaksi @relation(fields: [id_transaksi], references: [id_transaksi])
+  produk    produk    @relation(fields: [id_produk], references: [id_produk])
 
   @@index([id_transaksi])
   @@index([id_produk])
 }
 
 model tracking_transaksi {
-  id_tracking       Int      @id @default(autoincrement())
-  id_transaksi      Int
-  status_tracking   String   @db.VarChar(100)
-  deskripsi         String   @db.Text
-  tanggal_tracking  DateTime @default(now()) @db.Timestamp(0)
-  created_at        DateTime @default(now()) @db.Timestamp(0)
+  id_tracking      Int      @id @default(autoincrement())
+  id_transaksi     Int
+  status_tracking  String   @db.VarChar(100)
+  deskripsi        String   @db.Text
+  tanggal_tracking DateTime @default(now()) @db.Timestamp(0)
+  created_at       DateTime @default(now()) @db.Timestamp(0)
 
   transaksi transaksi @relation(fields: [id_transaksi], references: [id_transaksi], onDelete: Cascade)
 
@@ -87,19 +88,71 @@ model tracking_transaksi {
 }
 
 model users {
-  id_user   Int         @id @default(autoincrement())
-  username  String      @db.VarChar(50)
-  password  String      @db.VarChar(255)
-  token     String?     @db.VarChar(255)
-  email     String      @unique(map: "email") @db.VarChar(100)
-  alamat    String?     @db.VarChar(100)
-  keranjang keranjang[]
-  transaksi transaksi[]
+  id_user       Int            @id @default(autoincrement())
+  username      String         @db.VarChar(50)
+  password      String         @db.VarChar(255)
+  token         String?        @db.VarChar(255)
+  email         String         @unique(map: "email") @db.VarChar(100)
+  alamat        Json?
+  keranjang     keranjang[]
+  transaksi     transaksi[]
+  notifications Notification[]
+  review_produk review_produk[]
+}
+
+model Notification {
+  id            Int              @id @default(autoincrement())
+  userId        Int
+  transactionId Int?
+  statusId      Int?
+  title         String
+  message       String
+  type          NotificationType @default(INFO)
+  actionUrl     String?
+  isRead        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  readAt        DateTime?
+
+  users          users           @relation(fields: [userId], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "notifikasi_ibfk_1")
+  transaksi      transaksi?      @relation(fields: [transactionId], references: [id_transaksi], onDelete: Cascade)
+  trackingStatus TrackingStatus? @relation(fields: [statusId], references: [id])
+}
+
+model TrackingStatus {
+  id            Int    @id @default(autoincrement())
+  code          String @unique
+  label         String
+  orderPosition Int
+
+  notifications Notification[]
 }
 
 enum transaksi_metode_transaksi {
   Bank
-  Qris
-  Dana
+  Visa
   Paypal
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  SYSTEM
+}
+
+model review_produk {
+  id_review    Int      @id @default(autoincrement())
+  id_produk    Int
+  id_user      Int
+  rating       Int      @db.TinyInt
+  komentar     String?  @db.Text
+  tanggal_review DateTime @default(now()) @db.Timestamp(0)
+
+  produk produk @relation(fields: [id_produk], references: [id_produk], onDelete: Cascade)
+  users  users  @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+
+  @@index([id_produk], map: "id_produk")
+  @@index([id_user], map: "id_user")
+  @@unique([id_produk, id_user], map: "unique_user_product_review")
 }

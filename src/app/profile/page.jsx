@@ -16,7 +16,12 @@ const ProfilePage = () => {
     const [formData, setFormData] = useState({
         username: "",
         email: "",
-        alamat: ""
+        alamat: {
+            negara: "",
+            kota: "",
+            jalan: "",
+            detail: ""
+        }
     });
     const [saving, setSaving] = useState(false);
     const [orders, setOrders] = useState([]);
@@ -31,32 +36,45 @@ const ProfilePage = () => {
             try {
                 let userData = null;
 
-                if (session?.user?.id_user) {
+                // Cek apakah user login via NextAuth (Google) atau JWT
+                const isNextAuthUser = session?.user?.id_user && status === 'authenticated';
+                
+                if (isNextAuthUser) {
+                    // Untuk NextAuth, ambil dari session dan API
                     const res = await fetch('/api/me');
                     const data = await res.json();
+                    
+                    // Prioritaskan image dari session NextAuth (Google OAuth)
+                    const userImage = session.user.image || session.user.picture || null;
                     
                     if (res.ok && data.user) {
                         userData = {
                             ...data.user,
+                            // Prioritaskan image dari session (Google OAuth)
+                            image: userImage || data.user.image || null,
                             authProvider: 'google'
                         };
                     } else {
+                        // Fallback ke session data
                         userData = {
                             id_user: session.user.id_user,
                             username: session.user.username || session.user.name,
                             email: session.user.email,
-                            image: session.user.image,
+                            image: userImage,
                             authProvider: 'google',
                             alamat: session.user.alamat || null
                         };
                     }
                 } else {
+                    // Untuk JWT auth, ambil dari API
                     const res = await fetch('/api/me');
                     const data = await res.json();
                     
                     if (res.ok && data.user) {
                         userData = {
                             ...data.user,
+                            // Coba ambil image dari session jika ada
+                            image: session?.user?.image || session?.user?.picture || data.user.image || null,
                             authProvider: 'jwt'
                         };
                     } else {
@@ -64,13 +82,45 @@ const ProfilePage = () => {
                         return;
                     }
                 }
+                
+                // Debug logging (bisa dihapus setelah testing)
+                console.log('User data loaded:', { 
+                    hasImage: !!userData.image, 
+                    imageSource: userData.image ? 'session' : 'none',
+                    sessionImage: session?.user?.image 
+                });
 
                 if (userData) {
                     setUser(userData);
+                    // Parse alamat jika sudah ada (dari JSON)
+                    let parsedAlamat = {
+                        negara: "",
+                        kota: "",
+                        jalan: "",
+                        detail: ""
+                    };
+                    
+                    if (userData.alamat) {
+                        if (typeof userData.alamat === 'string') {
+                            try {
+                                parsedAlamat = JSON.parse(userData.alamat);
+                            } catch (e) {
+                                // Jika bukan JSON, tetap gunakan default
+                            }
+                        } else if (typeof userData.alamat === 'object') {
+                            parsedAlamat = {
+                                negara: userData.alamat.negara || "",
+                                kota: userData.alamat.kota || "",
+                                jalan: userData.alamat.jalan || "",
+                                detail: userData.alamat.detail || ""
+                            };
+                        }
+                    }
+                    
                     setFormData({
                         username: userData.username || "",
                         email: userData.email || "",
-                        alamat: userData.alamat || "",
+                        alamat: parsedAlamat,
                     });
                 }
             } catch (err) {
@@ -130,18 +180,37 @@ const ProfilePage = () => {
             return;
         }
 
+        // Validasi alamat
+        if (!formData.alamat.negara.trim() || !formData.alamat.kota.trim() || !formData.alamat.jalan.trim()) {
+            alert("Negara, Kota, dan Jalan wajib diisi");
+            return;
+        }
+
         setSaving(true);
         try {
+            // Kirim alamat dalam format JSON
+            const alamatData = {
+                negara: formData.alamat.negara.trim(),
+                kota: formData.alamat.kota.trim(),
+                jalan: formData.alamat.jalan.trim(),
+                detail: formData.alamat.detail.trim() || null
+            };
+
             const res = await fetch('/api/profile/update-alamat', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({ alamat: alamatData }),
             });
 
             const data = await res.json();
 
             if (res.ok) {
-                setUser({ ...user, ...data.user });
+                // Pastikan image tetap dipertahankan setelah update
+                setUser({ 
+                    ...user, 
+                    ...data.user,
+                    image: user.image || session?.user?.image || data.user.image || null
+                });
                 setEditing(false);
                 alert("Profile berhasil diperbarui!");
             } else {
@@ -154,12 +223,6 @@ const ProfilePage = () => {
             setSaving(false);
         }
     };
-
-    const stats = [
-        { label: "Total Transaksi", value: "12", icon: FiPackage, color: "text-blue-600" },
-        { label: "Bergabung Sejak", value: "2024", icon: FiTrendingUp, color: "text-green-600" },
-        { label: "Status", value: "Aktif", icon: FiShield, color: "text-purple-600" }
-    ];
 
     if (loading || !user) {
         return (
@@ -193,7 +256,7 @@ const ProfilePage = () => {
                     className="max-w-6xl mx-auto"
                 >
                     {/* Header Section */}
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-12 mt-10">
                         <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
@@ -203,7 +266,6 @@ const ProfilePage = () => {
                             {user.image ? (
                                 <img 
                                     src={user.image} 
-                                    alt={user.username} 
                                     className="w-full h-full rounded-full object-cover shadow-lg border-4 border-white"
                                 />
                             ) : (
@@ -231,29 +293,6 @@ const ProfilePage = () => {
                             {user.email}
                         </motion.p>
                     </div>
-
-                    {/* Stats Cards */}
-                    {/* <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-                    >
-                        {stats.map((stat, index) => (
-                            <motion.div
-                                key={stat.label}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.6 + index * 0.1 }}
-                                whileHover={{ scale: 1.02 }}
-                                className="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100"
-                            >
-                                <stat.icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
-                                <h3 className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</h3>
-                                <p className="text-gray-600">{stat.label}</p>
-                            </motion.div>
-                        ))}
-                    </motion.div> */}
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         {/* Sidebar Navigation */}
@@ -335,10 +374,35 @@ const ProfilePage = () => {
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => {
                                             setEditing(false);
+                                            // Reset form data dengan data user yang ada
+                                            let parsedAlamat = {
+                                                negara: "",
+                                                kota: "",
+                                                jalan: "",
+                                                detail: ""
+                                            };
+                                            
+                                            if (user.alamat) {
+                                                if (typeof user.alamat === 'string') {
+                                                    try {
+                                                        parsedAlamat = JSON.parse(user.alamat);
+                                                    } catch (e) {
+                                                        // Jika bukan JSON, tetap gunakan default
+                                                    }
+                                                } else if (typeof user.alamat === 'object') {
+                                                    parsedAlamat = {
+                                                        negara: user.alamat.negara || "",
+                                                        kota: user.alamat.kota || "",
+                                                        jalan: user.alamat.jalan || "",
+                                                        detail: user.alamat.detail || ""
+                                                    };
+                                                }
+                                            }
+                                            
                                             setFormData({
-                                            username: user.username || "",
-                                            email: user.email || "",
-                                            alamat: user.alamat || "",
+                                                username: user.username || "",
+                                                email: user.email || "",
+                                                alamat: parsedAlamat,
                                             });
                                         }}
                                         className="flex items-center bg-gray-300 text-gray-700 px-6 py-2 rounded-xl hover:bg-gray-400 transition-colors"
@@ -387,19 +451,112 @@ const ProfilePage = () => {
                                         Alamat
                                     </label>
                                     {editing ? (
-                                        <textarea
-                                        value={formData.alamat}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, alamat: e.target.value })
-                                        }
-                                        placeholder="Masukkan alamat lengkap"
-                                        rows="4"
-                                        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                        />
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Negara *
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={formData.alamat.negara}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                alamat: { ...formData.alamat, negara: e.target.value }
+                                                            })
+                                                        }
+                                                        placeholder="Contoh: Indonesia"
+                                                        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Kota *
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={formData.alamat.kota}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                alamat: { ...formData.alamat, kota: e.target.value }
+                                                            })
+                                                        }
+                                                        placeholder="Contoh: Jakarta"
+                                                        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Jalan *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.alamat.jalan}
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            alamat: { ...formData.alamat, jalan: e.target.value }
+                                                        })
+                                                    }
+                                                    placeholder="Contoh: Jl. Merdeka 10"
+                                                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Detail Lainnya (opsional)
+                                                </label>
+                                                <textarea
+                                                    value={formData.alamat.detail}
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            alamat: { ...formData.alamat, detail: e.target.value }
+                                                        })
+                                                    }
+                                                    placeholder="Contoh: Dekat Alfamart, Gedung A Lantai 2"
+                                                    rows="3"
+                                                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                                />
+                                            </div>
+                                        </div>
                                     ) : (
-                                        <p className="text-lg text-gray-900 bg-gray-50 rounded-xl px-4 py-3 min-h-[120px]">
-                                        {user.alamat || "Belum ada alamat yang ditambahkan"}
-                                        </p>
+                                        <div className="text-gray-900 bg-gray-50 rounded-xl px-4 py-3 min-h-[120px]">
+                                            {user.alamat && typeof user.alamat === 'object' && user.alamat.negara ? (
+                                                <div className="space-y-1">
+                                                    <p className="font-medium">{user.alamat.jalan || ""}</p>
+                                                    <p>{user.alamat.kota || ""}, {user.alamat.negara || ""}</p>
+                                                    {user.alamat.detail && (
+                                                        <p className="text-sm text-gray-600 mt-2">{user.alamat.detail}</p>
+                                                    )}
+                                                </div>
+                                            ) : user.alamat && typeof user.alamat === 'string' ? (
+                                                (() => {
+                                                    try {
+                                                        const parsed = JSON.parse(user.alamat);
+                                                        return (
+                                                            <div className="space-y-1">
+                                                                <p className="font-medium">{parsed.jalan || ""}</p>
+                                                                <p>{parsed.kota || ""}, {parsed.negara || ""}</p>
+                                                                {parsed.detail && (
+                                                                    <p className="text-sm text-gray-600 mt-2">{parsed.detail}</p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    } catch (e) {
+                                                        return <p>{user.alamat}</p>;
+                                                    }
+                                                })()
+                                            ) : (
+                                                <p>Belum ada alamat yang ditambahkan</p>
+                                            )}
+                                        </div>
                                     )}
                                     </div>
                                 </div>
@@ -419,36 +576,36 @@ const ProfilePage = () => {
                                     </div>
 
                                     <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
-                                        <h3 className="font-semibold text-lg text-blue-800 mb-2">Perhatian Keamanan</h3>
-                                        <p className="text-gray-700 mb-3">Harap berhati-hati saat memasukkan data ke situs ini. Lindungi informasi pribadi Anda seperti alamat, nomor telepon, dan detail pembayaran. Ikuti praktik keamanan standar untuk melindungi akun Anda.</p>
+                                        <h3 className="font-semibold text-lg text-blue-800 mb-2">Security Notice</h3>
+                                        <p className="text-gray-700 mb-3">Please be cautious when entering data on this site. Protect your personal information such as address, phone number, and payment details. Follow standard security practices to safeguard your account.</p>
                                         <ul className="list-disc list-inside text-gray-700 space-y-2">
-                                            <li>Gunakan kata sandi yang kuat dan unik untuk akun Anda.</li>
-                                            <li>Hindari membagikan token atau kredensial melalui pesan/email.</li>
-                                            <li>Pastikan Anda menggunakan jaringan yang aman (hindari Wi‑Fi publik saat melakukan transaksi sensitif).</li>
-                                            <li>Waspadai tautan atau email phising yang mengatasnamakan layanan kami—kami tidak akan meminta kata sandi melalui email.</li>
-                                            <li>Periksa URL situs sebelum memasukkan informasi sensitif, pastikan menggunakan HTTPS.</li>
+                                            <li>Use a strong and unique password for your account.</li>
+                                            <li>Avoid sharing tokens or credentials via messages/email.</li>
+                                            <li>Ensure you are using a secure network (avoid public Wi-Fi when conducting sensitive transactions).</li>
+                                            <li>Be wary of phishing links or emails claiming to be from our service—we will never ask for your password via email.</li>
+                                            <li>Check the site URL before entering sensitive information, ensure it uses HTTPS.</li>
                                         </ul>
                                     </div>
 
                                     <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                                        <h4 className="font-semibold text-gray-900 mb-2">Tips Profesional</h4>
-                                        <p className="text-gray-700 mb-3">Sebagai praktik terbaik, kami menyarankan:</p>
+                                        <h4 className="font-semibold text-gray-900 mb-2">Professional Tips</h4>
+                                        <p className="text-gray-700 mb-3">As a best practice, we recommend:</p>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="p-3 border rounded-lg bg-gray-50">
-                                                <p className="font-medium text-gray-800">Perbarui Kata Sandi Secara Berkala</p>
-                                                <p className="text-sm text-gray-600">Ganti kata sandi setiap beberapa bulan dan gunakan manajer kata sandi jika perlu.</p>
+                                                <p className="font-medium text-gray-800">Update Passwords Regularly</p>
+                                                <p className="text-sm text-gray-600">Change your password every few months and use a password manager if needed.</p>
                                             </div>
                                             <div className="p-3 border rounded-lg bg-gray-50">
-                                                <p className="font-medium text-gray-800">Aktifkan Autentikasi Dua Faktor</p>
-                                                <p className="text-sm text-gray-600">Jika tersedia, aktifkan 2FA untuk lapisan perlindungan tambahan pada akun Anda.</p>
+                                                <p className="font-medium text-gray-800">Enable Two-Factor Authentication</p>
+                                                <p className="text-sm text-gray-600">If available, enable 2FA for an additional layer of protection on your account.</p>
                                             </div>
                                             <div className="p-3 border rounded-lg bg-gray-50">
-                                                <p className="font-medium text-gray-800">Konfirmasi Transaksi</p>
-                                                <p className="text-sm text-gray-600">Periksa ringkasan pesanan sebelum menyelesaikan pembayaran.</p>
+                                                <p className="font-medium text-gray-800">Confirm Transactions</p>
+                                                <p className="text-sm text-gray-600">Review the order summary before completing payment.</p>
                                             </div>
                                             <div className="p-3 border rounded-lg bg-gray-50">
-                                                <p className="font-medium text-gray-800">Laporkan Aktivitas Mencurigakan</p>
-                                                <p className="text-sm text-gray-600">Segera hubungi tim dukungan jika melihat aktivitas tidak biasa pada akun Anda.</p>
+                                                <p className="font-medium text-gray-800">Report Suspicious Activity</p>
+                                                <p className="text-sm text-gray-600">Immediately contact the support team if you notice unusual activity on your account.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -487,7 +644,7 @@ const ProfilePage = () => {
 
                                                         <div className="divide-y">
                                                             {tx.detail_transaksi?.map((d) => (
-                                                                <div key={d.id_detail} className="py-3 flex flex-col md:flex gap-4 items-center">
+                                                                <div key={d.id_detail} className="py-3 flex flex-col md:flex-row gap-4 items-center">
                                                                     <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden shrink-0">
                                                                         <img src={d.produk?.gambar || d.produk?.image_url || '/product-fish/default.png'} alt={d.produk?.nama_produk} className="w-full h-full object-cover" />
                                                                     </div>
