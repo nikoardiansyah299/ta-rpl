@@ -2,18 +2,18 @@
 import { prisma } from "@/lib/prisma";
 
 export const TRACKING_STATUS = {
-  ORDER_CREATED: 'pesanan_dibuat',
-  PAYMENT_CONFIRMED: 'pembayaran_dikonfirmasi', 
-  PROCESSING: 'sedang_diproses',
-  QUALITY_CHECK: 'quality_control',
-  PACKAGING: 'packaging',
-  SHIPPED_TO_PORT: 'dikirim_ke_pelabuhan',
-  PORT_DEPARTURE: 'berangkat_dari_pelabuhan',
-  PORT_ARRIVAL: 'tiba_di_pelabuhan_tujuan',
-  CUSTOMS_CHECK: 'proses_bea_cukai',
-  IN_TRANSIT: 'dalam_perjalanan',
-  OUT_FOR_DELIVERY: 'menuju_alamat_tujuan',
-  DELIVERED: 'terkirim'
+  ORDER_CREATED: 'Order Created',
+  PAYMENT_CONFIRMED: 'Payment Confirmed', 
+  PROCESSING: 'In Processing',
+  QUALITY_CHECK: 'Quality Control',
+  PACKAGING: 'Packaging',
+  SHIPPED_TO_PORT: 'Sent to Harbour',
+  PORT_DEPARTURE: 'Departed from Harbour',
+  PORT_ARRIVAL: 'Arrived at Destination',
+  CUSTOMS_CHECK: 'Processing Customs',
+  IN_TRANSIT: 'In Transit',
+  OUT_FOR_DELIVERY: 'To the Destination Address',
+  DELIVERED: 'Delivered'
 };
 
 export const createTrackingEntry = async (id_transaksi, status_tracking, deskripsi) => {
@@ -42,7 +42,7 @@ export const initializeTransactionTracking = async (id_transaksi) => {
     const initialTrackings = [
       {
         status: TRACKING_STATUS.ORDER_CREATED,
-        deskripsi: 'Pesanan telah berhasil dibuat dan sedang menunggu konfirmasi pembayaran'
+        deskripsi: 'Order has been created and is awaiting payment confirmation'
       }
     ];
 

@@ -69,18 +69,18 @@ const PackageTracking = ({ transactionId }) => {
 
   const getStatusIcon = (status) => {
     const iconMap = {
-      pesanan_dibuat: FiPackage,
-      pembayaran_dikonfirmasi: FiCheck,
-      sedang_diproses: FiPackage,
+      ordered_on: FiPackage,
+      payment_confirmed: FiCheck,
+      in_processing: FiPackage,
       quality_control: FiShield,
       packaging: FiBox,
-      dikirim_ke_pelabuhan: FiTruck,
-      berangkat_dari_pelabuhan: FiAnchor,
-      tiba_di_pelabuhan_tujuan: FiAnchor,
-      proses_bea_cukai: FiShield,
-      dalam_perjalanan: FiGlobe,
-      menuju_alamat_tujuan: FiMapPin,
-      terkirim: FiCheck
+      sent_to_harbour: FiTruck,
+      departed_from_harbour: FiAnchor,
+      arrived_at_destination: FiAnchor,
+      processing_bea_cukai: FiShield,
+      on_the_way: FiGlobe,
+      to_the_destination_address: FiMapPin,
+      delivered: FiCheck
     };
     return iconMap[status] || FiClock;
   };
@@ -97,18 +97,18 @@ const PackageTracking = ({ transactionId }) => {
 
   const getStatusText = (status) => {
     const textMap = {
-      pesanan_dibuat: 'Pesanan Dibuat',
-      pembayaran_dikonfirmasi: 'Pembayaran Dikonfirmasi',
-      sedang_diproses: 'Sedang Diproses',
+      ordered_on: 'Order created',
+      payment_confirmed: 'Payment confirmed',
+      in_processing: 'In processing',
       quality_control: 'Quality Control',
       packaging: 'Packaging',
-      dikirim_ke_pelabuhan: 'Dikirim ke Pelabuhan',
-      berangkat_dari_pelabuhan: 'Berangkat dari Pelabuhan',
-      tiba_di_pelabuhan_tujuan: 'Tiba di Pelabuhan Tujuan',
-      proses_bea_cukai: 'Proses Bea Cukai',
-      dalam_perjalanan: 'Dalam Perjalanan',
-      menuju_alamat_tujuan: 'Menuju Alamat Tujuan',
-      terkirim: 'Terkirim'
+      sent_to_harbour: 'Sent to Harbour',
+      departed_from_harbour: 'Departed from Harbour',
+      arrived_at_destination: 'Arrived at Destination',
+      processing_bea_cukai: 'Processing Customs',
+      on_the_way: 'On the way',
+      to_the_destination_address: 'To the Destination Address',
+      delivered: 'delivered'
     };
     return textMap[status] || status.replace(/_/g, ' ');
   };
@@ -131,8 +131,8 @@ const PackageTracking = ({ transactionId }) => {
             <FiTruck className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Lacak Pengiriman</h2>
-            <p className="text-gray-600">Memuat data tracking...</p>
+            <h2 className="text-2xl font-bold text-gray-900">Tracking Order</h2>
+            <p className="text-gray-600">Loading tracking data...</p>
           </div>
         </div>
         <div className="flex justify-center items-center py-8">
@@ -150,8 +150,8 @@ const PackageTracking = ({ transactionId }) => {
             <FiClock className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Lacak Pengiriman</h2>
-            <p className="text-gray-600">Gagal memuat data tracking</p>
+            <h2 className="text-2xl font-bold text-gray-900">Tracking Order</h2>
+            <p className="text-gray-600">Failed to load tracking data</p>
           </div>
         </div>
         <div className="text-center py-6">
@@ -160,7 +160,7 @@ const PackageTracking = ({ transactionId }) => {
             onClick={fetchTrackingData}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Coba Lagi
+            Try Again
           </button>
         </div>
       </div>
@@ -175,13 +175,13 @@ const PackageTracking = ({ transactionId }) => {
             <FiPackage className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Lacak Pengiriman</h2>
-            <p className="text-gray-600">Data tracking belum tersedia</p>
+            <h2 className="text-2xl font-bold text-gray-900">Tracking Order</h2>
+            <p className="text-gray-600">Tracking data is not available</p>
           </div>
         </div>
         <div className="text-center py-8">
           <FiPackage className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">Belum ada data tracking untuk pesanan ini</p>
+          <p className="text-gray-500">Tracking data has not been created for this order</p>
         </div>
       </div>
     );
@@ -194,8 +194,8 @@ const PackageTracking = ({ transactionId }) => {
           <FiTruck className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Lacak Pengiriman</h2>
-          <p className="text-gray-600">Perjalanan pesanan Anda hingga sampai di tujuan</p>
+          <h2 className="text-2xl font-bold text-gray-900">Tracking Order</h2>
+          <p className="text-gray-600">Your order has arrived at the destination</p>
         </div>
       </div>
 
@@ -231,7 +231,7 @@ const PackageTracking = ({ transactionId }) => {
                 {isLastItem && (
                   <div className="mt-2 inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
                     <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-                    Status Terkini
+                    Newest Status
                   </div>
                 )}
               </div>

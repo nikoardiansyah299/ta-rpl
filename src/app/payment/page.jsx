@@ -32,7 +32,7 @@ export default function PaymentPage() {
         const data = await res.json();
 
         if (!isNextAuthLoggedIn && !data?.user?.id_user) {
-          alert("Silakan login terlebih dahulu!");
+          alert("Please log in first!");
           router.push("/login");
           return;
         }
@@ -50,7 +50,7 @@ export default function PaymentPage() {
   const fetchCart = async () => {
     const res = await fetch("/api/cart");
     const data = await res.json();
-    if (!res.ok) return alert(data.error || "Gagal memuat data keranjang");
+    if (!res.ok) return alert(data.error || "Failed to load cart items");
 
     setCartItems(data);
     const totalHarga = data.reduce((sum, item) => sum + item.total_harga, 0);
@@ -60,7 +60,7 @@ export default function PaymentPage() {
   const fetchJasa = async () => {
     const res = await fetch("/api/shipping_service");
     const data = await res.json();
-    if (!res.ok) return alert("Gagal memuat data jasa pengiriman");
+    if (!res.ok) return alert("Failed to load shipping services");
     setJasaList(data);
   };
 
@@ -80,8 +80,8 @@ export default function PaymentPage() {
   };
 
   const handlePayment = async () => {
-    if (!metode) return alert("Pilih metode pembayaran!");
-    if (!selectedJasa) return alert("Pilih jasa pengiriman!");
+    if (!metode) return alert("Chose a payment option!");
+    if (!selectedJasa) return alert("Chose a shipping service!");
 
     setLoading(true);
     try {
@@ -93,13 +93,13 @@ export default function PaymentPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || data.details || "Pembayaran gagal");
+        throw new Error(data.error || data.details || "Payment failed");
       }
-      alert("Transaksi berhasil!");
+      alert("Transaction successful!");
       router.push("/history");
     } catch (err) {
       console.error("Payment error:", err);
-      alert(err.message || "Terjadi kesalahan saat memproses pembayaran");
+      alert(err.message || "An error had occurred during payment");
     } finally {
       setLoading(false);
     }
@@ -121,8 +121,8 @@ export default function PaymentPage() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8 my-15">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">Checkout Pembayaran</h1>
-            <p className="text-gray-600 text-lg">Lengkapi informasi untuk menyelesaikan pesanan Anda</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">Payment Checkout</h1>
+            <p className="text-gray-600 text-lg">Fill in informations to complete your order</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -139,7 +139,7 @@ export default function PaymentPage() {
                 {loadingAlamat ? (
                   <div className="flex items-center gap-3 py-4">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                    <p className="text-gray-500">Load Address...</p>
+                    <p className="text-gray-500">Loading Address...</p>
                   </div>
                 ) : userAlamat ? (
                   <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
@@ -276,10 +276,10 @@ export default function PaymentPage() {
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nama Bank
+                            Bank Name
                           </label>
                           <select className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white">
-                            <option value="">-- Pilih Bank --</option>
+                            <option value="">-- Select Bank --</option>
                             <option value="bca">Bank Central Asia (BCA)</option>
                             <option value="mandiri">Bank Mandiri</option>
                             <option value="bni">Bank Negara Indonesia (BNI)</option>
@@ -289,27 +289,27 @@ export default function PaymentPage() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nomor Rekening
+                            Account Number
                           </label>
                           <input
                             type="text"
-                            placeholder="Masukkan nomor rekening"
+                            placeholder="Enter your bank account number"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nama Pemilik Rekening
+                            Account Owner Name
                           </label>
                           <input
                             type="text"
-                            placeholder="Nama sesuai rekening"
+                            placeholder="Name in bank account"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <p className="text-sm text-blue-700">
-                            <strong>Catatan:</strong> Setelah memilih transfer bank, silakan transfer sesuai total pembayaran ke rekening yang tertera.
+                            <strong>Note:</strong> after choosing to transfer, please transfer the full order amount into the disclosed account number.
                           </p>
                         </div>
                       </div>
@@ -320,7 +320,7 @@ export default function PaymentPage() {
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nomor Kartu Debit
+                            Debit Card Number
                           </label>
                           <input
                             type="text"
@@ -336,18 +336,18 @@ export default function PaymentPage() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nama di Kartu
+                            Name on Card
                           </label>
                           <input
                             type="text"
-                            placeholder="Nama sesuai kartu"
+                            placeholder="Name as it appears on card"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Tanggal Kadaluarsa
+                              Expiration Date
                             </label>
                             <input
                               type="text"
@@ -380,7 +380,7 @@ export default function PaymentPage() {
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <p className="text-sm text-blue-700">
-                            <strong>Keamanan:</strong> Informasi kartu Anda aman dan tidak akan disimpan.
+                            <strong>Security:</strong> Your bank account information is safe and not stored.
                           </p>
                         </div>
                       </div>
@@ -405,7 +405,7 @@ export default function PaymentPage() {
                           </label>
                           <input
                             type="password"
-                            placeholder="Masukkan password PayPal"
+                            placeholder="Enter your PayPal password"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
                         </div>
@@ -416,12 +416,12 @@ export default function PaymentPage() {
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                           <label htmlFor="paypal-save" className="text-sm text-gray-700">
-                            Simpan informasi untuk pembayaran selanjutnya
+                            Safe this info for future payments
                           </label>
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <p className="text-sm text-blue-700">
-                            <strong>Informasi:</strong> Anda akan diarahkan ke halaman PayPal untuk menyelesaikan pembayaran.
+                            <strong>Information:</strong> You are directed to Paypal Payment app to complete the order.
                           </p>
                         </div>
                       </div>

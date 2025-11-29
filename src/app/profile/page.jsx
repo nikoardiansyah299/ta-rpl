@@ -151,11 +151,11 @@ const ProfilePage = () => {
             try {
                 const res = await fetch('/api/transaction/history', { cache: 'no-store' });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data?.message || 'Gagal memuat pesanan');
+                if (!res.ok) throw new Error(data?.message || 'Failed to load orders');
                 if (mounted) setOrders(data.transaksi || []);
             } catch (err) {
                 console.error('Error fetching orders:', err);
-                if (mounted) setOrdersError(err.message || 'Gagal memuat pesanan');
+                if (mounted) setOrdersError(err.message || 'Failed to load orders');
             } finally {
                 if (mounted) setOrdersLoading(false);
             }
@@ -176,13 +176,13 @@ const ProfilePage = () => {
 
     const handleSaveProfile = async () => {
         if (!formData.username.trim() || !formData.email.trim()) {
-            alert("Username dan email tidak boleh kosong");
+            alert("Username adn Email cannot be empty");
             return;
         }
 
         // Validasi alamat
         if (!formData.alamat.negara.trim() || !formData.alamat.kota.trim() || !formData.alamat.jalan.trim()) {
-            alert("Negara, Kota, dan Jalan wajib diisi");
+            alert("Country, City, and Street are required in the address");
             return;
         }
 
@@ -212,13 +212,13 @@ const ProfilePage = () => {
                     image: user.image || session?.user?.image || data.user.image || null
                 });
                 setEditing(false);
-                alert("Profile berhasil diperbarui!");
+                alert("Profile updated successfully!");
             } else {
-                alert(data.error || "Gagal memperbarui profile");
+                alert(data.error || "Failed to update profile");
             }
         } catch (err) {
             console.error('Error saving profile:', err);
-            alert("Terjadi kesalahan saat menyimpan profile");
+            alert("Error occurred while saving profile");
         } finally {
             setSaving(false);
         }
@@ -448,14 +448,14 @@ const ProfilePage = () => {
                                     <div className="md:col-span-2">
                                     <label className="flex items-center text-gray-700 font-semibold mb-2">
                                         <FiMapPin className="w-4 h-4 mr-2 text-blue-600" />
-                                        Alamat
+                                        Address
                                     </label>
                                     {editing ? (
                                         <div className="space-y-4">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Negara *
+                                                        Country *
                                                     </label>
                                                     <input
                                                         type="text"
@@ -466,14 +466,14 @@ const ProfilePage = () => {
                                                                 alamat: { ...formData.alamat, negara: e.target.value }
                                                             })
                                                         }
-                                                        placeholder="Contoh: Indonesia"
+                                                        placeholder="Example: Indonesia"
                                                         className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                         required
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Kota *
+                                                        City *
                                                     </label>
                                                     <input
                                                         type="text"
@@ -484,7 +484,7 @@ const ProfilePage = () => {
                                                                 alamat: { ...formData.alamat, kota: e.target.value }
                                                             })
                                                         }
-                                                        placeholder="Contoh: Jakarta"
+                                                        placeholder="Example: Jakarta"
                                                         className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                         required
                                                     />
@@ -492,7 +492,7 @@ const ProfilePage = () => {
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Jalan *
+                                                    Street *
                                                 </label>
                                                 <input
                                                     type="text"
@@ -503,14 +503,14 @@ const ProfilePage = () => {
                                                             alamat: { ...formData.alamat, jalan: e.target.value }
                                                         })
                                                     }
-                                                    placeholder="Contoh: Jl. Merdeka 10"
+                                                    placeholder="Example: Jl. Merdeka 10"
                                                     className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     required
                                                 />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Detail Lainnya (opsional)
+                                                    Other details (optional)
                                                 </label>
                                                 <textarea
                                                     value={formData.alamat.detail}
@@ -520,7 +520,7 @@ const ProfilePage = () => {
                                                             alamat: { ...formData.alamat, detail: e.target.value }
                                                         })
                                                     }
-                                                    placeholder="Contoh: Dekat Alfamart, Gedung A Lantai 2"
+                                                    placeholder="Example: Near Microsoft Office A 2nd floor"
                                                     rows="3"
                                                     className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                                 />
@@ -554,7 +554,7 @@ const ProfilePage = () => {
                                                     }
                                                 })()
                                             ) : (
-                                                <p>Belum ada alamat yang ditambahkan</p>
+                                                <p>No address added</p>
                                             )}
                                         </div>
                                     )}

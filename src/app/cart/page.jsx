@@ -43,12 +43,12 @@ export default function CartPage() {
         if (data?.user?.id_user) {
           fetchCart();
         } else {
-          alert("Silakan login terlebih dahulu!");
+          alert("Please login first!");
           router.push("/login");
         }
       } catch (err) {
         console.error("Auth check error:", err);
-        alert("Silakan login terlebih dahulu!");
+        alert("Please login first!");
         router.push("/login");
       }
     };
@@ -66,7 +66,7 @@ export default function CartPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal memuat data keranjang");
+      if (!res.ok) throw new Error(data.error || "Failed to fetch cart");
 
       setCartItems(data);
       const totalHarga = data.reduce(
@@ -84,7 +84,7 @@ export default function CartPage() {
 
   // Hapus item dari keranjang
   const handleRemove = async (id_keranjang) => {
-    if (!confirm("Yakin mau menghapus produk ini dari keranjang?")) return;
+    if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
       const res = await fetch(`/api/cart/${id_keranjang}`, {
@@ -92,9 +92,9 @@ export default function CartPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal menghapus item");
+      if (!res.ok) throw new Error(data.error || "Failed to delete item");
 
-      alert("Produk berhasil dihapus dari keranjang!");
+      alert("Product removed from cart!");
       fetchCart();
       // Hapus dari selected items jika ada
       setSelectedItems(prev => prev.filter(id => id !== id_keranjang));
@@ -108,7 +108,7 @@ export default function CartPage() {
   const handleRemoveSelected = async () => {
     if (selectedItems.length === 0) return;
     
-    if (!confirm(`Yakin mau menghapus ${selectedItems.length} produk dari keranjang?`)) return;
+    if (!confirm(`Are you sure you want to remove ${selectedItems.length} Product from cart?`)) return;
 
     try {
       // Hapus satu per satu dari backend
@@ -117,14 +117,14 @@ export default function CartPage() {
       );
 
       await Promise.all(deletePromises);
-      alert(`${selectedItems.length} produk berhasil dihapus dari keranjang!`);
+      alert(`${selectedItems.length} Product removed from cart!`);
       
       // Refresh cart dan reset selected items
       fetchCart();
       setSelectedItems([]);
     } catch (err) {
       console.error(err);
-      alert("Gagal menghapus beberapa produk");
+      alert("Failed to remove selected items");
     }
   };
 
@@ -155,7 +155,7 @@ export default function CartPage() {
       <div className="flex h-screen justify-center items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat keranjang...</p>
+          <p className="text-gray-600">Loading cart...</p>
         </div>
       </div>
     );
@@ -168,13 +168,13 @@ export default function CartPage() {
         <Navbar textColor="text-black" />
         <div className="flex flex-col items-center justify-center min-h-screen">
           <p className="text-lg text-gray-700">
-            {error ? error : "Keranjang kamu masih kosong!"}
+            {error ? error : "Your cart is empty!"}
           </p>
           <button
             onClick={() => router.push("/product")}
             className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
-            Lihat Produk
+            See Product
           </button>
         </div>
         <Footer />
@@ -187,7 +187,7 @@ export default function CartPage() {
       <Navbar textColor="text-black" />
       <div className="min-h-screen py-10 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-6">
-          <h1 className="text-3xl font-bold mb-6 text-blue-900">Keranjang Saya</h1>
+          <h1 className="text-3xl font-bold mb-6 text-blue-900">My Cart</h1>
 
           {/* Header */}
           <div className="flex items-center justify-between font-semibold text-gray-700 mb-4 px-4 py-2 bg-gray-50 rounded-lg">

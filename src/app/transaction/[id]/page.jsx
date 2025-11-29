@@ -53,7 +53,7 @@ export default function TransactionPage({ params }) {
     const meData = await meRes.json();
 
     if (!isNextAuthLoggedIn && !meData?.user?.id_user) {
-      alert("Silakan login terlebih dahulu!");
+      alert("Please log in first to view transaction details!");
       setLoading(false);
       router.push("/login");
       return;
@@ -67,17 +67,17 @@ export default function TransactionPage({ params }) {
     const data = await res.json();
         
         if (res.status === 401 || res.status === 403) {
-          alert("Anda tidak memiliki akses ke transaksi ini!");
+          alert("You are not authorized to view this transaction!");
           router.push("/history");
           return;
         }
         
         if (res.status === 404) {
-          setError("Transaksi tidak ditemukan");
+          setError("Transaction not found");
           return;
         }
 
-        if (!res.ok) throw new Error(data.message || data.error || "Gagal memuat data transaksi");
+        if (!res.ok) throw new Error(data.message || data.error || "Failed to fetch transaction details");
         
         setTransaction(data.transaksi);
       } catch (err) {
@@ -182,32 +182,32 @@ export default function TransactionPage({ params }) {
       {
         date: new Date(orderDate.getTime() + 1 * 24 * 60 * 60 * 1000),
         status: 'processed',
-        title: 'Pesanan Diproses',
-        description: 'Pesanan sedang dalam proses packing dan quality control',
+        title: 'Order Processed',
+        description: 'order is being prepared for shipment',
         icon: FiPackage,
         color: 'text-blue-600'
       },
       {
         date: new Date(orderDate.getTime() + 3 * 24 * 60 * 60 * 1000),
         status: 'shipped',
-        title: 'Dikirim ke Pelabuhan Indonesia',
-        description: 'Pesanan telah dikirim menuju pelabuhan ekspor di Indonesia',
+        title: 'Shipped to Indonesian Export Harbour',
+        description: 'Shipment has left the local warehouse and is on its way to the export harbour',
         icon: FiNavigation,
         color: 'text-orange-600'
       },
       {
         date: new Date(orderDate.getTime() + 5 * 24 * 60 * 60 * 1000),
         status: 'transit',
-        title: 'Transit di Pelabuhan Internasional',
-        description: 'Pesanan sedang transit di pelabuhan internasional untuk proses customs',
+        title: 'Transit in International Harbour',
+        description: 'Order is in transit at the international harbour',
         icon: FiAnchor,
         color: 'text-purple-600'
       },
       {
         date: new Date(orderDate.getTime() + 8 * 24 * 60 * 60 * 1000),
         status: 'delivered',
-        title: 'Dalam Perjalanan ke Tujuan',
-        description: 'Pesanan sedang dalam perjalanan menuju alamat tujuan',
+        title: 'In route to Destination',
+        description: 'Order is on the way to the final destination',
         icon: FiGlobe,
         color: 'text-green-600'
       }
@@ -221,7 +221,7 @@ export default function TransactionPage({ params }) {
           <div className="flex justify-center items-center min-h-96">
             <div className="text-center">
               <div className="animate-spin h-16 w-16 rounded-full border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-500 text-lg font-medium">Memuat detail transaksi...</p>
+              <p className="text-gray-500 text-lg font-medium">Loading transaction details...</p>
             </div>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function TransactionPage({ params }) {
             className="flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors"
           >
             <FiArrowLeft className="w-5 h-5 mr-2" />
-            Kembali
+            Back
           </button>
           
           <div className="text-center py-16">
@@ -246,16 +246,16 @@ export default function TransactionPage({ params }) {
               <FiPackage className="w-10 h-10 text-red-600" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {error || "Transaksi tidak ditemukan"}
+              {error || "Transaction Not Found"}
             </h2>
             <p className="text-gray-600 mb-6 text-lg">
-              {error ? "Terjadi kesalahan saat memuat data transaksi" : "Transaksi yang Anda cari tidak dapat ditemukan"}
+              {error ? "An error has occured" : "The transaction you are looking for does not exist."}
             </p>
             <button
               onClick={() => router.push("/history")}
               className="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
-              Lihat Riwayat Transaksi
+              See Transaction History
             </button>
           </div>
         </div>
@@ -277,11 +277,11 @@ export default function TransactionPage({ params }) {
             className="flex items-center text-blue-600 hover:text-blue-700 transition-colors group"
           >
             <FiArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-            Kembali ke Riwayat
+            Back to order History
           </button>
           
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Detail Pesanan</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Order Details</h1>
             <p className="text-gray-600">ID: {transaction.id_transaksi}</p>
           </div>
 
@@ -305,7 +305,7 @@ export default function TransactionPage({ params }) {
                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
                   <FiPackage className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Detail Produk</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Product Details</h2>
               </div>
 
               <div className="space-y-4">
@@ -329,7 +329,7 @@ export default function TransactionPage({ params }) {
                         <h3 className="font-bold text-gray-900 text-lg mb-1">{item.produk.nama_produk}</h3>
                         <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                           <div>
-                            <span className="font-medium">Harga per kg:</span>
+                            <span className="font-medium">Price/kg:</span>
                             <p className="text-blue-600 font-semibold text-lg">
                               {formatCurrency(item.produk.harga_kg)}
                             </p>
@@ -360,22 +360,27 @@ export default function TransactionPage({ params }) {
                 <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
                   <FiCalendar className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Informasi Pesanan</h2>
+                <h2 className="text-xl font-bold text-gray-900">Order Informations</h2>
               </div>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <span className="text-gray-600">ID Transaksi</span>
+                  <span className="text-gray-600">Transaction ID</span>
                   <span className="font-semibold text-gray-900">{transaction.id_transaksi}</span>
                 </div>
                 <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <span className="text-gray-600">Tanggal</span>
+                  <span className="text-gray-600">Date</span>
                   <span className="font-semibold text-gray-900">
-                    {formatDate(transaction.tgl_transaksi)}
+                    {new Date(transaction.tgl_transaksi).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <span className="text-gray-600">Metode Bayar</span>
+                  <span className="text-gray-600">Payment Method</span>
                   <span className="font-semibold text-gray-900 capitalize">
                     {transaction.metode_transaksi || 'Transfer Bank'}
                   </span>
@@ -395,16 +400,16 @@ export default function TransactionPage({ params }) {
                 <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center">
                   <FiTruck className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Pengiriman</h2>
+                <h2 className="text-xl font-bold text-gray-900">Shipment</h2>
               </div>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Kurir</span>
+                  <span className="text-gray-600">Courrier</span>
                   <span className="font-semibold text-gray-900">{transaction.jasa_pengirim.jasa_kirim}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Biaya Kirim</span>
+                  <span className="text-gray-600">Shipping fee</span>
                   <span className="font-semibold text-blue-600">
                     {formatCurrency(transaction.jasa_pengirim.harga_pengiriman)}
                   </span>
@@ -414,7 +419,7 @@ export default function TransactionPage({ params }) {
                     <div className="flex items-start gap-2">
                       <FiMapPin className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">Alamat Pengiriman</p>
+                        <p className="text-sm text-gray-600 mb-1">Shipment Address</p>
                         <p className="text-sm font-medium text-gray-900">{session.user.alamat}</p>
                       </div>
                     </div>
@@ -429,16 +434,16 @@ export default function TransactionPage({ params }) {
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center">
                   <FiDollarSign className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Ringkasan Pembayaran</h2>
+                <h2 className="text-xl font-bold text-gray-900">Payment Summary</h2>
               </div>
 
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Subtotal Produk</span>
+                  <span className="text-gray-600">Subtotal Product</span>
                   <span className="font-medium">{formatCurrency(totalProduk)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Biaya Pengiriman</span>
+                  <span className="text-gray-600">Shipping fee</span>
                   <span className="font-medium">{formatCurrency(transaction.jasa_pengirim.harga_pengiriman)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">

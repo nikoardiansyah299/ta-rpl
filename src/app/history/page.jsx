@@ -38,7 +38,7 @@ export default function HistoryPage() {
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || data.error || "Gagal memuat data");
+        if (!res.ok) throw new Error(data.message || data.error || "Failed to fetch data");
         
         setTransactions(data.transaksi || []);
         setFiltered(data.transaksi || []);
@@ -86,9 +86,9 @@ export default function HistoryPage() {
   const getStatusText = (status) => {
     switch (status) {
       case "pending": return "Order being processed";
-      case "shipping": return "Sedang Dikirim";
-      case "arrived": return "Pesanan Sampai";
-      case "cancelled": return "Dibatalkan";
+      case "shipping": return "In Transit";
+      case "arrived": return "Order Delivered";
+      case "cancelled": return "Cancelled";
       default: return status;
     }
   };
@@ -98,7 +98,7 @@ export default function HistoryPage() {
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin h-12 w-12 rounded-full border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500 text-lg">Memuat riwayat transaksi...</p>
+          <p className="text-gray-500 text-lg">Loading Transaction History...</p>
         </div>
       </div>
     );
@@ -116,7 +116,7 @@ export default function HistoryPage() {
             onClick={() => window.location.reload()}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Coba Lagi
+            Try Again
           </button>
         </div>
       </div>
@@ -132,18 +132,18 @@ export default function HistoryPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-3 mt-10">Transaction History</h1>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Lacak semua pesanan dan transaksi yang telah Anda lakukan
+              Track all your past purchases and order statuses in one place.
             </p>
           </div>
 
           {/* Filter Status */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {[
-              { value: "all", label: "Semua", count: transactions.length },
+              { value: "all", label: "All", count: transactions.length },
               { value: "pending", label: "Pending", count: transactions.filter(t => t.status_transaksi === "pending").length },
               { value: "shipping", label: "Shipping", count: transactions.filter(t => t.status_transaksi === "shipping").length },
-              { value: "arrived", label: "Sampai", count: transactions.filter(t => t.status_transaksi === "arrived").length },
-              { value: "cancelled", label: "Dibatalkan", count: transactions.filter(t => t.status_transaksi === "cancelled").length }
+              { value: "arrived", label: "Arrived", count: transactions.filter(t => t.status_transaksi === "arrived").length },
+              { value: "cancelled", label: "Cancelled", count: transactions.filter(t => t.status_transaksi === "cancelled").length }
             ].map((filter) => (
               <button
                 key={filter.value}
@@ -173,13 +173,13 @@ export default function HistoryPage() {
                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiPackage className="w-12 h-12 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">Belum ada transaksi</h3>
-                <p className="text-gray-500 mb-6">Mulai berbelanja untuk melihat riwayat transaksi Anda</p>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Transaction yet</h3>
+                <p className="text-gray-500 mb-6">Start purchasing to see your order details.</p>
                 <button
                   onClick={() => router.push("/product")}
                   className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
-                  Mulai Berbelanja
+                  Start Purchasing
                 </button>
               </div>
             ) : (
@@ -205,7 +205,7 @@ export default function HistoryPage() {
                         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
                             <FiCalendar className="w-4 h-4" />
-                            <span>{new Date(transaction.tgl_transaksi).toLocaleDateString("id-ID", { 
+                            <span>{new Date(transaction.tgl_transaksi).toLocaleDateString("en-EN", { 
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',
@@ -229,7 +229,7 @@ export default function HistoryPage() {
                         onClick={() => router.push(`/transaction/${transaction.id_transaksi}`)}
                         className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 whitespace-nowrap"
                       >
-                        Lihat Detail
+                        See Details
                         <FiArrowRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -239,7 +239,7 @@ export default function HistoryPage() {
                   <div className="p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <FiPackage className="w-5 h-5" />
-                      Produk yang Dipesan
+                      Products in this Transaction
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -251,13 +251,13 @@ export default function HistoryPage() {
                           >
                             <div className="flex justify-between items-start mb-2">
                               <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
-                                {detail.produk?.nama_produk || "Produk tidak tersedia"}
+                                {detail.produk?.nama_produk || "Product not available"}
                               </h4>
                             </div>
                             
                             <div className="space-y-1 text-xs text-gray-600">
                               <p>Quantity: <span className="font-semibold">{detail.jumlah_kg} kg</span></p>
-                              <p>Harga: <span className="font-semibold">Rp {detail.produk.harga_kg?.toLocaleString("id-ID")}/kg</span></p>
+                              <p>Price: <span className="font-semibold">Rp {detail.produk.harga_kg?.toLocaleString("id-ID")}/kg</span></p>
                               <div className="pt-2 border-t border-gray-200">
                                 <p className="font-semibold text-blue-600">
                                   Subtotal: Rp {detail.subtotal?.toLocaleString("id-ID")}
@@ -269,7 +269,7 @@ export default function HistoryPage() {
                       ) : (
                         <div className="col-span-full text-center py-8">
                           <FiPackage className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                          <p className="text-gray-500">Tidak ada detail produk</p>
+                          <p className="text-gray-500">No details on the product</p>
                         </div>
                       )}
                     </div>
@@ -280,7 +280,7 @@ export default function HistoryPage() {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer/>
     </>
   );
 }

@@ -268,7 +268,7 @@ export default function ReviewProduct({ productId }) {
             </div>
             <div className="text-gray-600">
               <p className="font-medium">{ratingCount} Review</p>
-              <p className="text-sm">berdasarkan {ratingCount} penilaian</p>
+              <p className="text-sm">according {ratingCount} review</p>
             </div>
           </div>
         )}
@@ -281,7 +281,7 @@ export default function ReviewProduct({ productId }) {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-blue-900">Review Anda</p>
+                  <p className="font-semibold text-blue-900">Your Review</p>
                   <StarRating rating={userReview.rating} interactive={false} />
                   {userReview.komentar && (
                     <p className="text-blue-700 mt-2">{userReview.komentar}</p>
@@ -301,7 +301,7 @@ export default function ReviewProduct({ productId }) {
                 onClick={() => setShowForm(true)}
                 className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
-                Tulis Review
+                Write Review
               </button>
             )
           )}
@@ -321,7 +321,7 @@ export default function ReviewProduct({ productId }) {
 
               <div className="mb-4">
                 <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-                  Komentar (opsional)
+                  Comments (optional)
                 </label>
                 <textarea
                   id="comment"
@@ -337,7 +337,7 @@ export default function ReviewProduct({ productId }) {
                   placeholder="Bagikan pengalaman Anda tentang produk ini..."
                 />
                 <p className={`text-xs mt-1 ${userComment.length >= 500 ? 'text-red-500' : 'text-gray-500'}`}>
-                  {userComment.length}/500 karakter
+                  {userComment.length}/500 characters
                 </p>
               </div>
 
@@ -347,7 +347,7 @@ export default function ReviewProduct({ productId }) {
                   disabled={submitting || userRating === 0}
                   className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Menyimpan...' : userReview ? 'Perbarui Review' : 'Kirim Review'}
+                  {submitting ? 'Saving...' : userReview ? 'Update Review' : 'Send Review'}
                 </button>
                 {showForm && (
                   <button
@@ -361,7 +361,7 @@ export default function ReviewProduct({ productId }) {
                     }}
                     className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    Batal
+                    Cancel
                   </button>
                 )}
               </div>
@@ -373,7 +373,7 @@ export default function ReviewProduct({ productId }) {
       {!isLoggedIn && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
           <p className="text-yellow-800 text-sm">
-            <strong>Login</strong> untuk memberikan review produk ini
+            <strong>Login</strong> for submitting a review
           </p>
         </div>
       )}
@@ -394,7 +394,7 @@ export default function ReviewProduct({ productId }) {
       {/* Daftar Reviews */}
       <div className="mt-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Semua Review ({ratingCount})
+          All Reviews ({ratingCount})
         </h3>
         {loading ? (
           <div className="text-center py-8">
@@ -402,7 +402,7 @@ export default function ReviewProduct({ productId }) {
           </div>
         ) : reviews.length === 0 ? (
           <div className="text-center py-8 bg-white rounded-lg border border-gray-200">
-            <p className="text-gray-500">Belum ada review untuk produk ini</p>
+            <p className="text-gray-500">There is no review yet for this product</p>
           </div>
         ) : (
           <div className="space-y-4">
