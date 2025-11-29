@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { FiTruck, FiCreditCard, FiMapPin, FiPackage, FiCheck, FiArrowRight } from "react-icons/fi";
 import { CiBank } from "react-icons/ci";
 import { FaCcPaypal } from "react-icons/fa";
+import Notification from '@/components/Notification';
 
 export default function PaymentPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -19,6 +20,25 @@ export default function PaymentPage() {
   const [loadingAlamat, setLoadingAlamat] = useState(true);
   const router = useRouter();
   const { data: session, status } = useSession();
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+
+  const showNotification = (message, type = 'success', autoHide = 3000) => {
+    setNotification({ show: true, message, type });
+    if (autoHide) setTimeout(() => setNotification(prev => ({ ...prev, show: false })), autoHide);
+  };
+
+  // Payment method fields
+  const [bankName, setBankName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [accountOwner, setAccountOwner] = useState('');
+
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+
+  const [paypalEmail, setPaypalEmail] = useState('');
+  const [paypalPassword, setPaypalPassword] = useState('');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -32,7 +52,7 @@ export default function PaymentPage() {
         const data = await res.json();
 
         if (!isNextAuthLoggedIn && !data?.user?.id_user) {
-          alert("Please log in first!");
+          showNotification("Please log in first!", 'error');
           router.push("/login");
           return;
         }
@@ -50,7 +70,10 @@ export default function PaymentPage() {
   const fetchCart = async () => {
     const res = await fetch("/api/cart", { credentials: 'include' });
     const data = await res.json();
-    if (!res.ok) return alert(data.error || "Failed to load cart items");
+    if (!res.ok) {
+      showNotification(data.error || "Failed to load cart items", 'error');
+      return;
+    }
 
     setCartItems(data);
     const totalHarga = data.reduce((sum, item) => sum + item.total_harga, 0);
@@ -60,7 +83,10 @@ export default function PaymentPage() {
   const fetchJasa = async () => {
     const res = await fetch("/api/shipping_service", { credentials: 'include' });
     const data = await res.json();
-    if (!res.ok) return alert("Failed to load shipping services");
+    if (!res.ok) {
+      showNotification("Failed to load shipping services", 'error');
+      return;
+    }
     setJasaList(data);
   };
 
@@ -70,7 +96,7 @@ export default function PaymentPage() {
       const res = await fetch("/api/me", { credentials: 'include' });
       const data = await res.json();
       if (res.status === 401 || res.status === 403) {
-        alert("Silakan login terlebih dahulu!");
+        showNotification("Silakan login terlebih dahulu!", 'error');
         router.push("/login");
         return;
       }
@@ -85,8 +111,34 @@ export default function PaymentPage() {
   };
 
   const handlePayment = async () => {
-    if (!metode) return alert("Chose a payment option!");
-    if (!selectedJasa) return alert("Chose a shipping service!");
+    if (!metode) {
+      showNotification("Choose a payment option!", 'error');
+      return;
+    }
+    if (!selectedJasa) {
+      showNotification("Choose a shipping service!", 'error');
+      return;
+    }
+
+    // Validate method-specific fields
+    if (metode === 'transfer_bank') {
+      if (!bankName.trim()) return showNotification('Please select a bank', 'error');
+      if (!accountNumber.trim()) return showNotification('Please enter account number', 'error');
+      if (!accountOwner.trim()) return showNotification('Please enter account owner name', 'error');
+    }
+
+    if (metode === 'Visa') {
+      const digits = cardNumber.replace(/\s+/g, '');
+      if (!digits || digits.length < 13) return showNotification('Please enter a valid card number', 'error');
+      if (!cardName.trim()) return showNotification('Please enter name on card', 'error');
+      if (!/^(0[1-9]|1[0-2])\/(\d{2})$/.test(cardExpiry)) return showNotification('Expiration date must be MM/YY', 'error');
+      if (!/^[0-9]{3,4}$/.test(cardCvv)) return showNotification('Please enter CVV (3-4 digits)', 'error');
+    }
+
+    if (metode === 'Paypal') {
+      if (!paypalEmail.trim()) return showNotification('Please enter PayPal email', 'error');
+      if (!paypalPassword.trim()) return showNotification('Please enter PayPal password', 'error');
+    }
 
     setLoading(true);
     try {
@@ -99,18 +151,19 @@ export default function PaymentPage() {
 
       const data = await res.json();
       if (res.status === 401 || res.status === 403) {
-        alert("Silakan login terlebih dahulu!");
+        showNotification("Silakan login terlebih dahulu!", 'error');
         router.push("/login");
         return;
       }
       if (!res.ok) {
         throw new Error(data.error || data.details || "Payment failed");
       }
-      alert("Transaction successful!");
-      router.push("/history");
+      // Show success notification and wait briefly before redirecting
+      showNotification("Transaction successful!", 'success', 2000);
+      setTimeout(() => router.push("/history"), 2000);
     } catch (err) {
       console.error("Payment error:", err);
-      alert(err.message || "An error had occurred during payment");
+      showNotification(err.message || "An error had occurred during payment", 'error');
     } finally {
       setLoading(false);
     }
@@ -124,6 +177,22 @@ export default function PaymentPage() {
     { value: "Visa", label: "Visa Debit Card", icon: <FiCreditCard/> },
     { value: "Paypal", label: "Paypal", icon: <FaCcPaypal/> }
   ];
+
+  // Check whether payment form fields are valid for selected method
+  const isPaymentFormValid = () => {
+    if (!metode || !selectedJasa) return false;
+    if (metode === 'transfer_bank') {
+      return bankName.trim() && accountNumber.trim() && accountOwner.trim();
+    }
+    if (metode === 'Visa') {
+      const digits = cardNumber.replace(/\s+/g, '');
+      return digits.length >= 13 && cardName.trim() && /^(0[1-9]|1[0-2])\/(\d{2})$/.test(cardExpiry) && /^[0-9]{3,4}$/.test(cardCvv);
+    }
+    if (metode === 'Paypal') {
+      return paypalEmail.trim() && paypalPassword.trim();
+    }
+    return true;
+  };
 
   return (
     <>
@@ -289,7 +358,7 @@ export default function PaymentPage() {
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Bank Name
                           </label>
-                          <select className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white">
+                          <select value={bankName} onChange={(e) => setBankName(e.target.value)} className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white">
                             <option value="">-- Select Bank --</option>
                             <option value="bca">Bank Central Asia (BCA)</option>
                             <option value="mandiri">Bank Mandiri</option>
@@ -304,6 +373,8 @@ export default function PaymentPage() {
                           </label>
                           <input
                             type="text"
+                            value={accountNumber}
+                            onChange={(e) => setAccountNumber(e.target.value)}
                             placeholder="Enter your bank account number"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
@@ -314,6 +385,8 @@ export default function PaymentPage() {
                           </label>
                           <input
                             type="text"
+                            value={accountOwner}
+                            onChange={(e) => setAccountOwner(e.target.value)}
                             placeholder="Name in bank account"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
@@ -335,14 +408,16 @@ export default function PaymentPage() {
                           </label>
                           <input
                             type="text"
-                            placeholder="1234 5678 9012 3456"
-                            maxLength="19"
-                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                            onInput={(e) => {
-                              let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
-                              let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-                              e.target.value = formattedValue;
+                            value={cardNumber}
+                            onChange={(e) => {
+                              let v = e.target.value.replace(/\D/g, '').substring(0,19);
+                              const parts = v.match(/.{1,4}/g);
+                              const formatted = parts ? parts.join(' ') : v;
+                              setCardNumber(formatted);
                             }}
+                            placeholder="1234 5678 9012 3456"
+                            maxLength="23"
+                            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
                         </div>
                         <div>
@@ -351,6 +426,8 @@ export default function PaymentPage() {
                           </label>
                           <input
                             type="text"
+                            value={cardName}
+                            onChange={(e) => setCardName(e.target.value)}
                             placeholder="Name as it appears on card"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
@@ -362,16 +439,17 @@ export default function PaymentPage() {
                             </label>
                             <input
                               type="text"
+                              value={cardExpiry}
+                              onChange={(e) => {
+                                let value = e.target.value.replace(/\D/g, '');
+                                if (value.length >= 3) value = value.substring(0,4);
+                                if (value.length >= 3) value = value.substring(0,2) + '/' + value.substring(2);
+                                if (value.length <= 2) value = value;
+                                setCardExpiry(value);
+                              }}
                               placeholder="MM/YY"
                               maxLength="5"
                               className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                              onInput={(e) => {
-                                let value = e.target.value.replace(/\D/g, '');
-                                if (value.length >= 2) {
-                                  value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                                }
-                                e.target.value = value;
-                              }}
                             />
                           </div>
                           <div>
@@ -380,18 +458,17 @@ export default function PaymentPage() {
                             </label>
                             <input
                               type="text"
+                              value={cardCvv}
+                              onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').substring(0,4))}
                               placeholder="123"
-                              maxLength="3"
+                              maxLength="4"
                               className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                              onInput={(e) => {
-                                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
-                              }}
                             />
                           </div>
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <p className="text-sm text-blue-700">
-                            <strong>Security:</strong> Your bank account information is safe and not stored.
+                            <strong>Security:</strong> Your card information is securely handled and not stored.
                           </p>
                         </div>
                       </div>
@@ -406,6 +483,8 @@ export default function PaymentPage() {
                           </label>
                           <input
                             type="email"
+                            value={paypalEmail}
+                            onChange={(e) => setPaypalEmail(e.target.value)}
                             placeholder="email@paypal.com"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
@@ -416,6 +495,8 @@ export default function PaymentPage() {
                           </label>
                           <input
                             type="password"
+                            value={paypalPassword}
+                            onChange={(e) => setPaypalPassword(e.target.value)}
                             placeholder="Enter your PayPal password"
                             className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                           />
@@ -427,7 +508,7 @@ export default function PaymentPage() {
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                           <label htmlFor="paypal-save" className="text-sm text-gray-700">
-                            Safe this info for future payments
+                            Save this info for future payments
                           </label>
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -480,9 +561,9 @@ export default function PaymentPage() {
 
                 <button
                   onClick={handlePayment}
-                  disabled={loading || !metode || !selectedJasa}
+                  disabled={loading || !isPaymentFormValid()}
                   className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-                    loading || !metode || !selectedJasa
+                    loading || !isPaymentFormValid()
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 shadow-lg hover:shadow-xl'
                   }`}
@@ -511,6 +592,11 @@ export default function PaymentPage() {
         </div>
       </div>
       <Footer />
+      <Notification
+        message={notification.show ? notification.message : ''}
+        type={notification.type}
+        onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+      />
     </>
   );
 }

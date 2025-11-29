@@ -7,6 +7,7 @@ import { FiUser, FiMail, FiMapPin, FiEdit2, FiSave, FiX, FiLogOut, FiShield, FiP
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Notification from '@/components/Notification';
 
 const ProfilePage = () => {
     const [user, setUser] = useState(null);
@@ -24,6 +25,7 @@ const ProfilePage = () => {
         }
     });
     const [saving, setSaving] = useState(false);
+    const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
     const [orders, setOrders] = useState([]);
     const [ordersLoading, setOrdersLoading] = useState(false);
     const [ordersError, setOrdersError] = useState(null);
@@ -211,7 +213,8 @@ const ProfilePage = () => {
                     image: user.image || session?.user?.image || data.user.image || null
                 });
                 setEditing(false);
-                alert("Profile updated successfully!");
+                setNotification({ show: true, message: 'Profile updated successfully!', type: 'success' });
+                setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
             } else {
                 alert(data.error || "Failed to update profile");
             }
@@ -691,6 +694,11 @@ const ProfilePage = () => {
                     </div>
                 </motion.div>
             </div>
+            <Notification
+                message={notification.show ? notification.message : ''}
+                type={notification.type}
+                onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+            />
             <Footer />
         </>
     );
