@@ -116,7 +116,6 @@ export default function ProductDetail({ params }) {
         // we don't rely on client-readable cookies; attempt the request and let
         // the server validate the cookie.
         const isNextAuthLoggedIn = session?.user?.id_user;
-<<<<<<< HEAD
         const res = await fetch("/api/me", {
             credentials: "include"
         });
@@ -129,11 +128,6 @@ export default function ProductDetail({ params }) {
         }
 
         setLoadingAddToCart(true);
-=======
-
-        // proceed and let server validate via cookie
-        setLoading(true);
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
         try {
             const res = await fetch("/api/cart/add", {
                 method: "POST",
@@ -170,7 +164,6 @@ export default function ProductDetail({ params }) {
         // we don't rely on client-readable cookies; attempt the request and let
         // the server validate the cookie.
         const isNextAuthLoggedIn = session?.user?.id_user;
-<<<<<<< HEAD
         const res = await fetch("/api/me", {
             credentials: "include"
         });
@@ -183,11 +176,6 @@ export default function ProductDetail({ params }) {
         }
 
         setLoadingOrderNow(true);
-=======
-
-        // proceed and let server validate via cookie
-        setLoading(true);
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
         try {
             // Tambahkan produk ke keranjang dulu
             const res = await fetch("/api/cart/add", {

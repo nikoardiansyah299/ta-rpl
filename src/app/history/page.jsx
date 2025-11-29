@@ -20,7 +20,6 @@ export default function HistoryPage() {
     if (status === 'loading') return;
 
     const fetchTransactions = async () => {
-<<<<<<< HEAD
       const isNextAuthLoggedIn = status === 'authenticated' && session?.user?.id_user;
       const res = await fetch("/api/me", {
         credentials: "include",
@@ -33,10 +32,6 @@ export default function HistoryPage() {
         return;
       }
 
-=======
-      // Do not rely on client-readable JWT; attempt to fetch and let server
-      // validate httpOnly cookie (if present). Let server decide auth.
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
       try {
         const res = await fetch("/api/transaction/history", {
           cache: "no-store",
@@ -44,16 +39,7 @@ export default function HistoryPage() {
         });
 
         const data = await res.json();
-<<<<<<< HEAD
         if (!res.ok) throw new Error(data.message || data.error || "Failed to fetch data");
-=======
-        if (res.status === 401 || res.status === 403) {
-          alert("Silakan login terlebih dahulu!");
-          router.push("/login");
-          return;
-        }
-        if (!res.ok) throw new Error(data.message || data.error || "Gagal memuat data");
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
         
         setTransactions(data.transaksi || []);
         setFiltered(data.transaksi || []);
@@ -158,11 +144,7 @@ export default function HistoryPage() {
               { value: "pending", label: "Pending", count: transactions.filter(t => t.status_transaksi === "pending").length },
               { value: "shipping", label: "Shipping", count: transactions.filter(t => t.status_transaksi === "shipping").length },
               { value: "arrived", label: "Arrived", count: transactions.filter(t => t.status_transaksi === "arrived").length },
-<<<<<<< HEAD
               { value: "cancelled", label: "Cancelled", count: transactions.filter(t => t.status_transaksi === "cancelled").length }
-=======
-              { value: "cancelled", label: "Cencelled", count: transactions.filter(t => t.status_transaksi === "cancelled").length }
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
             ].map((filter) => (
               <button
                 key={filter.value}

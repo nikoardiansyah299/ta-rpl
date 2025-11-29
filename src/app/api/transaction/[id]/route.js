@@ -1,18 +1,12 @@
-<<<<<<< HEAD
 // app/api/transaction/[id]/route.js
-=======
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
 import { prisma } from "@/lib/prisma";
 import { getUserIdFromRequest } from "@/lib/authHelper";
 
 export async function GET(req, { params }) {
   try {
-<<<<<<< HEAD
     // 🔧 FIX: Await params
     const { id } = await params;
     
-=======
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
     const { userId, authType } = await getUserIdFromRequest(req);
     
     if (!userId) {
@@ -22,11 +16,7 @@ export async function GET(req, { params }) {
       }, { status: 401 });
     }
 
-<<<<<<< HEAD
     const transactionId = parseInt(id);
-=======
-    const transactionId = parseInt(params.id);
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
     
     if (isNaN(transactionId)) {
       return Response.json({ 
@@ -56,14 +46,11 @@ export async function GET(req, { params }) {
               }
             }
           }
-<<<<<<< HEAD
         },
         tracking_transaksi: {
           orderBy: {
             tanggal_tracking: 'asc'
           }
-=======
->>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
         }
       }
     });
