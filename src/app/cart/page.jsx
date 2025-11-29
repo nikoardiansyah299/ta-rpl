@@ -22,9 +22,18 @@ export default function CartPage() {
     return sum + (item?.total_harga || 0);
   }, 0);
 
+<<<<<<< HEAD
+=======
+  // 🔐 Cek login: prefer fetch based on server-side cookie (httpOnly) or NextAuth
+  // Rationale: when users login manually the auth token may be an httpOnly cookie
+  // which is not accessible via js-cookie. Instead of relying on reading the
+  // cookie in the client, attempt to fetch the cart and let the server decide
+  // whether the request is authenticated (returns 200) or not (401).
+>>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
   useEffect(() => {
     if (status === "loading") return; // tunggu next-auth siap
 
+<<<<<<< HEAD
     const checkAuth = async () => {
       try {
         // Jika login via NextAuth (Google)
@@ -54,19 +63,47 @@ export default function CartPage() {
     };
 
     checkAuth();
+=======
+    // If NextAuth authenticated, fetch immediately
+    if (status === 'authenticated' && session?.user?.id_user) {
+      fetchCart();
+      return;
+    }
+
+    // Otherwise, try fetching the cart anyway. This allows httpOnly cookie
+    // based auth (manual login) to be used because the browser will send
+    // cookies when fetch uses credentials: 'include'. If the server returns
+    // 401/403 we'll redirect to login.
+    fetchCart();
+>>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
   }, [status, session, router]);
 
 
   // Ambil isi keranjang user
   const fetchCart = async () => {
     try {
+      // Include credentials so httpOnly cookies are sent for manual-login flows
       const res = await fetch("/api/cart", {
         cache: "no-store",
+<<<<<<< HEAD
         credentials: "include",
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to fetch cart");
+=======
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+      // If the server says the user is not authenticated, redirect to login
+      if (res.status === 401 || res.status === 403) {
+        alert("Silakan login terlebih dahulu!");
+        router.push("/login");
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || "Gagal memuat data keranjang");
+>>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
 
       setCartItems(data);
       const totalHarga = data.reduce(
@@ -89,6 +126,7 @@ export default function CartPage() {
     try {
       const res = await fetch(`/api/cart/${id_keranjang}`, {
         method: "DELETE",
+        credentials: 'include',
       });
 
       const data = await res.json();
@@ -113,7 +151,7 @@ export default function CartPage() {
     try {
       // Hapus satu per satu dari backend
       const deletePromises = selectedItems.map(id_keranjang =>
-        fetch(`/api/cart/${id_keranjang}`, { method: "DELETE" })
+        fetch(`/api/cart/${id_keranjang}`, { method: "DELETE", credentials: 'include' })
       );
 
       await Promise.all(deletePromises);

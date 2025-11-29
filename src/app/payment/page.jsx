@@ -23,6 +23,7 @@ export default function PaymentPage() {
   useEffect(() => {
     if (status === 'loading') return;
 
+<<<<<<< HEAD
     const init = async () => {
       try {
         const isNextAuthLoggedIn = status === 'authenticated' && session?.user?.id_user;
@@ -45,12 +46,28 @@ export default function PaymentPage() {
     };
 
     init();
+=======
+    // Do not rely on client-readable JWT; attempt to fetch and let server
+    // validate httpOnly cookie (if present). fetchXxx will handle 401/403.
+    fetchCart();
+    fetchJasa();
+    fetchUserAlamat();
+>>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
   }, [status, session, router]);
 
   const fetchCart = async () => {
-    const res = await fetch("/api/cart");
+    const res = await fetch("/api/cart", { credentials: 'include' });
     const data = await res.json();
+<<<<<<< HEAD
     if (!res.ok) return alert(data.error || "Failed to load cart items");
+=======
+    if (res.status === 401 || res.status === 403) {
+      alert("Silakan login terlebih dahulu!");
+      router.push("/login");
+      return;
+    }
+    if (!res.ok) return alert(data.error || "Gagal memuat data keranjang");
+>>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
 
     setCartItems(data);
     const totalHarga = data.reduce((sum, item) => sum + item.total_harga, 0);
@@ -58,17 +75,31 @@ export default function PaymentPage() {
   };
 
   const fetchJasa = async () => {
-    const res = await fetch("/api/shipping_service");
+    const res = await fetch("/api/shipping_service", { credentials: 'include' });
     const data = await res.json();
+<<<<<<< HEAD
     if (!res.ok) return alert("Failed to load shipping services");
+=======
+    if (res.status === 401 || res.status === 403) {
+      alert("Silakan login terlebih dahulu!");
+      router.push("/login");
+      return;
+    }
+    if (!res.ok) return alert("Gagal memuat data jasa pengiriman");
+>>>>>>> 64c14e1fc4133cf658d8fd5f77e222e019be7bea
     setJasaList(data);
   };
 
   const fetchUserAlamat = async () => {
     setLoadingAlamat(true);
     try {
-      const res = await fetch("/api/me");
+      const res = await fetch("/api/me", { credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401 || res.status === 403) {
+        alert("Silakan login terlebih dahulu!");
+        router.push("/login");
+        return;
+      }
       if (res.ok && data.user) {
         setUserAlamat(data.user.alamat || null);
       }
@@ -87,11 +118,17 @@ export default function PaymentPage() {
     try {
       const res = await fetch("/api/payment", {
         method: "POST",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_pengiriman: selectedJasa, metode }),
       });
 
       const data = await res.json();
+      if (res.status === 401 || res.status === 403) {
+        alert("Silakan login terlebih dahulu!");
+        router.push("/login");
+        return;
+      }
       if (!res.ok) {
         throw new Error(data.error || data.details || "Payment failed");
       }
