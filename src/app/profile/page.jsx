@@ -357,7 +357,7 @@ const ProfilePage = () => {
                                         className="flex items-center bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 transition-colors"
                                     >
                                         <FiEdit2 className="w-4 h-4 mr-2" />
-                                        Edit Alamat
+                                        Edit Address
                                     </motion.button>
                                     ) : (
                                     <div className="flex gap-2">
