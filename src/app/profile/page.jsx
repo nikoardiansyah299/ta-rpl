@@ -369,7 +369,7 @@ const ProfilePage = () => {
                                         className="flex items-center bg-green-600 text-white px-6 py-2 rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50"
                                         >
                                         <FiSave className="w-4 h-4 mr-2" />
-                                        {saving ? "Menyimpan..." : "Simpan"}
+                                        {saving ? "Saving..." : "Save"}
                                         </motion.button>
                                         <motion.button
                                         whileHover={{ scale: 1.05 }}
@@ -410,7 +410,7 @@ const ProfilePage = () => {
                                         className="flex items-center bg-gray-300 text-gray-700 px-6 py-2 rounded-xl hover:bg-gray-400 transition-colors"
                                         >
                                         <FiX className="w-4 h-4 mr-2" />
-                                        Batal
+                                        Cancel
                                         </motion.button>
                                     </div>
                                     )}
