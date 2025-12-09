@@ -268,7 +268,7 @@ export default function ReviewProduct({ productId }) {
             </div>
             <div className="text-gray-600">
               <p className="font-medium">{ratingCount} Review</p>
-              <p className="text-sm">according {ratingCount} review</p>
+              <p className="text-sm">according to {ratingCount} review</p>
             </div>
           </div>
         )}
@@ -334,7 +334,7 @@ export default function ReviewProduct({ productId }) {
                   rows={4}
                   maxLength={500}
                   className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none"
-                  placeholder="Bagikan pengalaman Anda tentang produk ini..."
+                  placeholder="Share your experience after ordering this product..."
                 />
                 <p className={`text-xs mt-1 ${userComment.length >= 500 ? 'text-red-500' : 'text-gray-500'}`}>
                   {userComment.length}/500 characters
