@@ -64,6 +64,44 @@ export default function HistoryPage() {
     }
   };
 
+  // Handle cancel transaction
+  const handleCancel = async (id_transaksi) => {
+    if (!confirm("Are you sure you want to cancel this transaction?")) return;
+
+    try {
+      const res = await fetch("/api/transaction/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_transaksi, status: "dibatalkan" }),
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        // Update state
+        setTransactions((prev) =>
+          prev.map((t) =>
+            t.id_transaksi === id_transaksi ? { ...t, status_transaksi: "cancelled" } : t
+          )
+        );
+        // Refresh filtered based on current filter
+        setFiltered((prev) => {
+          const updated = prev.map((t) =>
+            t.id_transaksi === id_transaksi ? { ...t, status_transaksi: "cancelled" } : t
+          );
+          if (statusFilter === "all") return updated;
+          return updated.filter((t) => t.status_transaksi === statusFilter);
+        });
+        alert("Transaction cancelled successfully");
+      } else {
+        const data = await res.json();
+        alert(data.message || "Failed to cancel transaction");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error cancelling transaction");
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "pending": return "bg-yellow-50 text-yellow-700 border-yellow-200";
@@ -233,6 +271,14 @@ export default function HistoryPage() {
                         See Details
                         <FiArrowRight className="w-4 h-4" />
                       </button>
+                      {transaction.status_transaksi === "pending" && (
+                        <button
+                          onClick={() => handleCancel(transaction.id_transaksi)}
+                          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2 whitespace-nowrap"
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </div>
                   </div>
 
